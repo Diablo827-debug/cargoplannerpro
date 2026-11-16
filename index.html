@@ -144,11 +144,12 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 </head>
 <body>
 <div id="login"><form id="lf">
-<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 4l18 10v20L24 44 6 34V14z"/><path d="M6 14l18 10 18-10M24 24v20"/></svg><div><b style="font-size:20px">Cargo Planner <span style="color:#f7931e">Pro</span> <span class="gds">GDS</span></b><div class="muted">Zaloguj się, aby kontynuować</div></div></div>
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 4l18 10v20L24 44 6 34V14z"/><path d="M6 14l18 10 18-10M24 24v20"/></svg><div><b style="font-size:20px">Cargo Planner <span style="color:#f7931e">Pro</span> <span class="gds">GDS</span></b><div class="muted" id="lsub">Zaloguj się, aby kontynuować</div></div></div>
 <div><label class="lbl" for="le">E-mail</label><input id="le" type="email" autocomplete="username" required></div>
-<div><label class="lbl" for="lp">Hasło</label><input id="lp" type="password" autocomplete="current-password" required></div>
+<div><label class="lbl" for="lp">Hasło</label><input id="lp" type="password" autocomplete="current-password" required minlength="6"></div>
+<div id="lp2box" hidden><label class="lbl" for="lp2">Powtórz hasło</label><input id="lp2" type="password" autocomplete="new-password" minlength="6"></div>
 <button class="btn or" type="submit" id="lb" style="padding:12px">Zaloguj</button>
-<button type="button" id="lr" style="background:none;border:none;color:#f7931e;font-size:14px">Nie pamiętam hasła</button>
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><button type="button" id="lr" style="background:none;border:none;color:#9babbf;font-size:14px;padding:0">Nie pamiętam hasła</button><button type="button" id="lmode" style="background:none;border:none;color:#f7931e;font-size:14px;font-weight:700;padding:0">Nie masz konta? Załóż konto</button></div>
 <div id="lmsg" class="muted"></div><div class="muted" style="font-size:11px;text-align:center;border-top:1px solid var(--bd);padding-top:10px">© 2026 Łukasz Grudka · Grudka Digital System (GDS)</div></form></div>
 <div class="app">
 <header class="top">
@@ -161,14 +162,15 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 <div class="cobar" id="coBar" hidden>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f7931e" stroke-width="2"><path d="M3 21V7l7-4v18M10 21h11V10l-11-3M14 13h3M14 17h3M6 10h1M6 14h1"/></svg>
 <select id="coSel" aria-label="Firma"></select>
-<button class="btn sm" id="coBtn">Firmy i dostęp</button>
+<button class="btn sm" id="coBtn" hidden>Administracja <span id="reqBadge" class="tag" hidden></span></button>
 </div>
-<details class="card" id="coCard" hidden><summary>Firmy i dostęp</summary><div id="coBody"></div></details>
-<section class="card" id="coFirst" hidden>
-<h2>Utwórz pierwszą firmę</h2>
-<p class="muted" style="margin:0 0 10px">Każda firma ma osobne zapisane plany. Widzą je tylko osoby, które do niej dodasz.</p>
-<div class="row"><input type="text" id="coNewFirst" placeholder="np. Meble TORA" style="flex:1"><button class="btn or" id="coCreateFirst">Utwórz</button></div>
-<p class="muted" id="coFirstMsg" style="margin:6px 0 0"></p>
+<details class="card" id="coCard" hidden><summary>Administracja firm</summary><div id="coBody"></div></details>
+<section class="card" id="coJoin" hidden style="margin:0 0 12px">
+<h2>Wybierz swoją firmę</h2>
+<p class="muted" style="margin:0 0 10px">Wybierz firmę, dla której pracujesz, i wyślij prośbę o dostęp. Administrator ją zatwierdzi, a firma pojawi się tutaj automatycznie.</p>
+<div id="joinPending"></div>
+<div class="row"><select id="joinSel" style="flex:1;min-width:180px"></select><button class="btn or" id="joinBtn">Wyślij prośbę</button></div>
+<p class="muted" id="joinMsg" style="margin:6px 0 0"></p>
 </section>
 <nav class="steps" aria-label="Kroki">
 <button class="step on" data-step="1" data-go="secLoad"><span class="n">1</span><span><b>Ładunek</b><span>Wymiary, ilość, waga</span></span></button><i class="arrow"></i>
@@ -448,6 +450,7 @@ $('newPlan').onclick=()=>{$('ordNo').value='';$('ordDate').value='';result=null;
 
 /* ---------- SAVE / LOAD ---------- */
 async function savePlan(){if(!result)return;const sm=$('saveMsg');if(!db){sm.innerHTML='<p class="msg err">Zapis jest niedostępny.</p>';return}
+if(multi&&!cid){sm.innerHTML='<p class="msg err">Aby zapisywać plany, dołącz najpierw do firmy (u góry ekranu).</p>';return}
 const name=($('planName').value.trim()||($('ordNo').value.trim()?'Zlecenie '+$('ordNo').value.trim():''));if(name&&!$('planName').value.trim())$('planName').value=name;if(!name){sm.innerHTML='<p class="msg err">Podaj nazwę planu.</p>';$('planName').focus();return}
 if(currentPlanId&&name!==currentPlanName)currentPlanId=null;const upd=!!currentPlanId;const r=result;const now=new Date().toISOString();
 const body={name,ord:r.ord||'',due:r.due||'',mode:r.mode,wMode:r.wMode||'each',totalKg:r.wMode==='total'?r.kg:0,sel:r.sel,kg:r.kg,gap:r.gap,o:r.o,items:r.items,opts:r.opts.map(x=>({veh:x.veh,length:x.length,Lmax:x.Lmax,fitL:x.fitL,fitP:x.fitP,ok:x.ok,useA:x.useA,useP:x.useP,status:x.status,lay:x.lay.map(p=>[p.x,p.y,p.l,p.w,p.g,p.kg,p.front?1:0])})),updatedAt:now,updatedBy:myId,updatedByName:myName};
@@ -470,46 +473,67 @@ const del=e.target.closest('[data-delplan]');if(del)armDelete(del,async()=>{try{
 const P=sub=>multi&&cid?`companies/${cid}/${sub}`:sub;
 const myMail=()=>String(myName||'').toLowerCase();
 const curCo=()=>companies.find(c=>c.id===cid);
-const isAdmin=()=>{const c=curCo();return!!c&&(c.admins||[]).includes(myMail())};
+let isSuper=false,allCos=[],dir=[],reqs=[];
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function subscribeData(){subs.forEach(u=>{try{u()}catch(e){}});subs=[];savedDocs=[];fleet=[];renderSaved();renderVeh();
+function subscribeData(){subs.forEach(u=>{try{u()}catch(e){}});subs=[];savedDocs=[];renderSaved();
 if(multi&&!cid){$('savedHint').textContent='';return}
 const tm=setTimeout(()=>{$('savedHint').textContent='brak połączenia'},10000);
-subs.push(db.collection(P('plans')).orderBy('updatedAt','desc').limit(200).onSnapshot(s=>{clearTimeout(tm);savedDocs=s.docs;renderSaved()},()=>{clearTimeout(tm);$('savedHint').textContent='niedostępne'}));
-}
+subs.push(db.collection(P('plans')).orderBy('updatedAt','desc').limit(200).onSnapshot(s=>{clearTimeout(tm);savedDocs=s.docs;renderSaved()},()=>{clearTimeout(tm);$('savedHint').textContent='niedostępne'}))}
 function setCompany(id){if(id===cid)return;cid=id;lsSet('cp_company',id||'');currentPlanId=null;currentPlanName='';$('saveMsg').innerHTML='';renderCompanies();subscribeData()}
-function renderCompanies(){if(!multi)return;const has=companies.length>0;$('coBar').hidden=!has;$('coFirst').hidden=has;
+function renderCompanies(){if(!multi)return;const has=companies.length>0;
+$('coBar').hidden=!has&&!isSuper;$('coSel').hidden=!has;$('coBtn').hidden=!isSuper;
 $('coSel').innerHTML=companies.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cid)$('coSel').value=cid;
-const c=curCo();if(!c){$('coBody').innerHTML='';return}const adm=isAdmin();
-$('coBody').innerHTML=`<p class="muted" style="margin:0 0 8px">Dostęp do firmy <b style="color:var(--tx)">${esc(c.name)}</b>. Osoby spoza listy nie widzą jej planów.</p>
-<div>${(c.members||[]).map(m=>`<div class="mem"><span>${esc(m)}</span>${(c.admins||[]).includes(m)?'<span class="tag">admin</span>':''}${adm&&m!==myMail()?`<button class="x" data-rmem="${esc(m)}" aria-label="Usuń dostęp">×</button>`:''}</div>`).join('')}</div>
-${adm?`<div class="row" style="margin-top:10px"><input type="email" id="memMail" placeholder="e-mail osoby" style="flex:1;min-width:160px"><label class="tog"><input type="checkbox" id="memAdm">admin</label><button class="btn sm" id="memAdd">Dodaj osobę</button></div>
-<p class="muted" style="margin:6px 0 0">Osoba musi mieć konto w aplikacji (zakładasz je w Firebase). Po dodaniu firma pojawi się u niej automatycznie.</p>`:'<p class="muted" style="margin:8px 0 0">Członków dodaje administrator firmy.</p>'}
-<div style="border-top:1px solid var(--bd);margin-top:12px;padding-top:12px"><label class="lbl">Nowa firma</label><div class="row"><input type="text" id="coNew" placeholder="nazwa firmy" style="flex:1"><button class="btn sm" id="coCreate">Utwórz firmę</button></div></div>
-<p class="muted" id="coMsg" style="margin:6px 0 0"></p>`}
-async function createCompany(name,msgEl){name=name.trim();if(!name){msgEl.textContent='Podaj nazwę firmy.';return}
-try{const ref=await db.collection('companies').add({name,members:[myMail()],admins:[myMail()],createdAt:new Date().toISOString()});lsSet('cp_company',ref.id);cid=null;setTimeout(()=>{if(companies.some(c=>c.id===ref.id))setCompany(ref.id)},600);msgEl.textContent='Utworzono firmę „'+name+'”.'}catch(e){msgEl.textContent='Nie udało się utworzyć firmy.'}}
-async function updateMembers(fn){const c=curCo();if(!c)return;const members=[...(c.members||[])],admins=[...(c.admins||[])];fn(members,admins);
-try{await db.collection('companies').doc(c.id).set({name:c.name,members,admins,createdAt:c.createdAt||''})}catch(e){const m=$('coMsg');if(m)m.textContent='Nie udało się zapisać zmian.'}}
+$('coJoin').hidden=has||isSuper;
+const pend=reqs.filter(r=>r.email===myMail());
+$('joinPending').innerHTML=pend.length?pend.map(r=>`<p class="msg info" style="margin:0 0 10px">Prośba o dostęp do <b style="color:var(--tx)">${esc(r.name||'firmy')}</b> czeka na akceptację.</p>`).join(''):'';
+$('joinSel').innerHTML=dir.length?dir.map(d=>`<option value="${esc(d.id)}">${esc(d.name)}</option>`).join(''):'<option value="">Brak firm – poczekaj, aż administrator je doda</option>';
+$('reqBadge').hidden=!(isSuper&&reqs.length);$('reqBadge').textContent=reqs.length;
+if(isSuper)renderAdmin()}
+function renderAdmin(){const pending=reqs;
+$('coBody').innerHTML=`<h3 style="margin:0 0 8px;font-size:15px">Prośby o dostęp ${pending.length?`<span class="tag">${pending.length}</span>`:''}</h3>
+${pending.length?pending.map(r=>`<div class="mem"><span>${esc(r.email)} → <b>${esc(r.name||'')}</b></span><button class="btn sm or" data-acc="${esc(r.id)}">Akceptuj</button><button class="x" data-rej="${esc(r.id)}" aria-label="Odrzuć">×</button></div>`).join(''):'<p class="muted" style="margin:0">Brak nowych próśb.</p>'}
+<h3 style="margin:16px 0 8px;font-size:15px">Firmy</h3>
+${allCos.length?allCos.map(c=>`<details style="border-top:1px solid var(--bd);padding:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(c.name)} <span class="muted" style="font-weight:400">· ${(c.members||[]).length} os.</span></summary>
+<div style="padding:6px 0 0">${(c.members||[]).map(m=>`<div class="mem"><span>${esc(m)}</span><button class="x" data-rmem="${esc(c.id)}|${esc(m)}" aria-label="Usuń dostęp">×</button></div>`).join('')||'<p class="muted" style="margin:0">Brak członków.</p>'}
+<div class="row" style="margin-top:8px"><input type="email" placeholder="dodaj e-mail" data-addmail="${esc(c.id)}" style="flex:1;min-width:150px"><button class="btn sm" data-addmem="${esc(c.id)}">Dodaj</button></div></div></details>`).join(''):'<p class="muted" style="margin:0">Nie ma jeszcze firm.</p>'}
+<div style="border-top:1px solid var(--bd);margin-top:12px;padding-top:12px"><label class="lbl">Nowa firma</label><div class="row"><input type="text" id="coNew" placeholder="nazwa firmy" style="flex:1;min-width:150px"><button class="btn sm or" id="coCreate">Utwórz firmę</button></div>
+<label class="tog" style="margin-top:8px"><input type="checkbox" id="coSelf" checked>Dodaj mnie jako członka (będę widzieć jej plany)</label></div>
+<p class="muted" id="coMsg" style="margin:6px 0 0"></p>
+<p class="muted" style="margin:10px 0 0;font-size:12px">Plany firmy widzą tylko jej członkowie. Administrator widzi listę firm i prośby, ale nie plany firm, do których nie należy.</p>`}
+async function createCompany(){const name=$('coNew').value.trim(),m=$('coMsg');if(!name){m.textContent='Podaj nazwę firmy.';return}
+try{const ref=db.collection('companies').doc();await ref.set({name,members:$('coSelf').checked?[myMail()]:[],createdAt:new Date().toISOString(),createdBy:myMail()});await db.collection('directory').doc(ref.id).set({name});m.textContent='Utworzono firmę „'+name+'”.';$('coNew').value=''}catch(e){m.textContent='Nie udało się utworzyć firmy.'}}
+async function setMembers(id,fn){const c=allCos.find(x=>x.id===id);if(!c)return;const members=[...(c.members||[])];fn(members);
+await db.collection('companies').doc(id).set({name:c.name,members,createdAt:c.createdAt||'',createdBy:c.createdBy||''})}
 $('coSel').onchange=e=>setCompany(e.target.value);
 $('coBtn').onclick=()=>{const c=$('coCard');c.hidden=!c.hidden;c.open=!c.hidden};
-$('coCreateFirst').onclick=()=>createCompany($('coNewFirst').value,$('coFirstMsg'));
-$('coBody').addEventListener('click',e=>{if(e.target.id==='coCreate'){createCompany($('coNew').value,$('coMsg'));return}
-if(e.target.id==='memAdd'){const m=$('memMail').value.trim().toLowerCase(),adm=$('memAdm').checked;if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){$('coMsg').textContent='Podaj poprawny e-mail.';return}
-updateMembers((mem,ad)=>{if(!mem.includes(m))mem.push(m);if(adm&&!ad.includes(m))ad.push(m)});return}
-const r=e.target.closest('[data-rmem]');if(r)armDelete(r,()=>updateMembers((mem,ad)=>{const m=r.dataset.rmem;mem.splice(mem.indexOf(m),1);const i=ad.indexOf(m);if(i>=0)ad.splice(i,1)}))});
-window.startDb=function(adb,me){db=adb;myId=me.uid||'';myName=me.email||'';multi=!!me.multi;if(myName)$('who').textContent=myName;
-if(!multi){subscribeData();return}
-db.collection('companies').where('members','array-contains',myMail()).onSnapshot(s=>{companies=s.docs.map(d=>({id:d.id,...(d.data()||{})})).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));
+$('joinBtn').onclick=async()=>{const id=$('joinSel').value,m=$('joinMsg');if(!id){m.textContent='Wybierz firmę.';return}const d=dir.find(x=>x.id===id);
+try{await db.collection('requests').doc(id+'_'+myMail()).set({cid:id,name:d?d.name:'',email:myMail(),createdAt:new Date().toISOString()});m.textContent='Wysłano prośbę. Poczekaj na akceptację.'}catch(e){m.textContent='Nie udało się wysłać prośby.'}};
+$('coBody').addEventListener('click',async e=>{const m=$('coMsg');
+if(e.target.id==='coCreate'){createCompany();return}
+const acc=e.target.closest('[data-acc]');if(acc){const r=reqs.find(x=>x.id===acc.dataset.acc);if(!r)return;try{await setMembers(r.cid,mem=>{if(!mem.includes(r.email))mem.push(r.email)});await db.collection('requests').doc(r.id).delete()}catch(err){if(m)m.textContent='Nie udało się zaakceptować.'}return}
+const rej=e.target.closest('[data-rej]');if(rej){armDelete(rej,async()=>{try{await db.collection('requests').doc(rej.dataset.rej).delete()}catch(err){}});return}
+const add=e.target.closest('[data-addmem]');if(add){const inp=$('coBody').querySelector(`[data-addmail="${add.dataset.addmem}"]`);const v=(inp.value||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.textContent='Podaj poprawny e-mail.';return}try{await setMembers(add.dataset.addmem,mem=>{if(!mem.includes(v))mem.push(v)})}catch(err){m.textContent='Nie udało się dodać.'}return}
+const rm=e.target.closest('[data-rmem]');if(rm){armDelete(rm,async()=>{const[id,em]=rm.dataset.rmem.split('|');try{await setMembers(id,mem=>{const i=mem.indexOf(em);if(i>=0)mem.splice(i,1)})}catch(err){}})}});
+function onMyCompanies(list){companies=list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));
 let want=cid&&companies.some(c=>c.id===cid)?cid:null;if(!want){const last=lsGet('cp_company');want=companies.some(c=>c.id===last)?last:(companies[0]&&companies[0].id)||null}
-if(want!==cid){cid=want;currentPlanId=null;currentPlanName='';subscribeData()}renderCompanies()},()=>{$('savedHint').textContent='niedostępne'})};
+if(want!==cid){cid=want;currentPlanId=null;currentPlanName='';subscribeData()}renderCompanies()}
+window.startDb=async function(adb,me){db=adb;myId=me.uid||'';myName=me.email||'';multi=!!me.multi;if(myName)$('who').textContent=myName;
+if(!multi){subscribeData();return}
+try{await db.collection('meta').doc('super').get();isSuper=true}catch(e){isSuper=false}
+const snap=(list)=>list.docs.map(d=>({id:d.id,...(d.data()||{})}));
+if(isSuper){db.collection('companies').onSnapshot(s=>{allCos=snap(s).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));onMyCompanies(allCos.filter(c=>(c.members||[]).includes(myMail())))},()=>{});
+db.collection('requests').onSnapshot(s=>{reqs=snap(s);renderCompanies()},()=>{})}
+else{db.collection('companies').where('members','array-contains',myMail()).onSnapshot(s=>onMyCompanies(snap(s)),()=>{$('savedHint').textContent='niedostępne'});
+db.collection('requests').where('email','==',myMail()).onSnapshot(s=>{reqs=snap(s);renderCompanies()},()=>{})}
+db.collection('directory').onSnapshot(s=>{dir=snap(s).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));renderCompanies()},()=>{});
+renderCompanies()};
 window.noDb=function(t){$('savedHint').textContent='niedostępne';$('savedList').innerHTML=`<p class="muted" style="margin:0">${t}</p>`};
 
 renderItems();renderVeh();setMode('pick');setStep(1);
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,addDoc,deleteDoc,onSnapshot,query,orderBy,limit,where} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {firebaseConfig} from "./firebase-config.js";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),fs=getFirestore(app);
@@ -518,7 +542,13 @@ const dref=(p,id)=>{const r=doc(fs,p,id);return{id:r.id,get:async()=>wrap(await 
 const coll=(p,c=[])=>({where:(f,op,v)=>coll(p,[...c,where(f,op,v)]),doc:id=>dref(p,id||doc(collection(fs,p)).id),add:async d=>({id:(await addDoc(collection(fs,p),d)).id}),orderBy:(f,dir)=>coll(p,[...c,orderBy(f,dir)]),limit:n=>coll(p,[...c,limit(n)]),onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),...c),s=>n({docs:s.docs.map(wrap),metadata:s.metadata}),x=>e&&e(x))});
 const $=id=>document.getElementById(id);let started=false;
 onAuthStateChanged(auth,u=>{if(u){$('login').style.display='none';$('logout').hidden=false;if(!started){started=true;window.startDb({collection:p=>coll(p)},{uid:u.uid,email:u.email,multi:true})}}else{$('login').style.display='flex';if(started)location.reload()}});
-$('lf').onsubmit=async e=>{e.preventDefault();$('lmsg').textContent='';$('lb').disabled=true;try{await signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value)}catch(err){$('lmsg').textContent='Nieprawidłowy e-mail lub hasło.'}finally{$('lb').disabled=false}};
+let reg=false;
+$('lmode').onclick=()=>{reg=!reg;$('lp2box').hidden=!reg;$('lp2').required=reg;$('lb').textContent=reg?'Załóż konto':'Zaloguj';$('lsub').textContent=reg?'Utwórz konto dla siebie i swojej firmy':'Zaloguj się, aby kontynuować';$('lmode').textContent=reg?'Masz konto? Zaloguj się':'Nie masz konta? Załóż konto';$('lr').hidden=reg;$('lp').autocomplete=reg?'new-password':'current-password';$('lmsg').textContent=''};
+const errPl=c=>({'auth/email-already-in-use':'Konto z tym e-mailem już istnieje. Zaloguj się.','auth/invalid-email':'Nieprawidłowy adres e-mail.','auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.','auth/operation-not-allowed':'Rejestracja jest wyłączona.','auth/too-many-requests':'Zbyt wiele prób. Spróbuj za chwilę.'}[c]);
+$('lf').onsubmit=async e=>{e.preventDefault();$('lmsg').textContent='';const em=$('le').value.trim(),pw=$('lp').value;
+if(reg&&pw!==$('lp2').value){$('lmsg').textContent='Hasła nie są takie same.';return}
+$('lb').disabled=true;try{if(reg)await createUserWithEmailAndPassword(auth,em,pw);else await signInWithEmailAndPassword(auth,em,pw)}
+catch(err){$('lmsg').textContent=errPl(err&&err.code)||(reg?'Nie udało się założyć konta.':'Nieprawidłowy e-mail lub hasło.')}finally{$('lb').disabled=false}};
 $('lr').onclick=async()=>{const m=$('le').value.trim();if(!m){$('lmsg').textContent='Wpisz najpierw e-mail.';return}try{await sendPasswordResetEmail(auth,m);$('lmsg').textContent='Wysłaliśmy link do zmiany hasła.'}catch(e){$('lmsg').textContent='Nie udało się wysłać linku.'}};
 $('logout').onclick=()=>signOut(auth);
 </script>
