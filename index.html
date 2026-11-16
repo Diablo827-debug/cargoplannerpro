@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cargo Planner Pro [GDS]</title>
+<meta name="author" content="Łukasz Grudka – Grudka Digital System">
+<meta name="copyright" content="© 2026 Łukasz Grudka · Grudka Digital System (GDS). Wszelkie prawa zastrzeżone.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b111b">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cargo Planner"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#0b111b;--panel:#121b28;--card:#182334;--card2:#1f2c40;--tx:#eef2f7;--tx2:#9babbf;--tx3:#6f7f94;--bd:#2a3a50;--or:#f7931e;--or2:#ff9f2e;--orbg:#3a250f;--ok:#58d26a;--okbg:#14301c;--okbd:#2f9a45;--bad:#ff7b7b;--badbg:#3b1a1f;--warn:#ffbf5e;--warnbg:#3a2a12;--r:14px;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+input,select,button{font:inherit;font-size:16px;color:var(--tx)}
+.app{max-width:1280px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:12px;padding:6px 2px 10px}
+.top .logo{flex:none}
+.top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}.top h1 em{font-style:normal;color:var(--or)}
+.top p{margin:1px 0 0;color:var(--tx2);font-size:13px}
+.top .user{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--tx2);font-size:13px;text-align:right}
+.iconbtn{background:var(--card);border:1px solid var(--bd);border-radius:10px;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);padding:0}
+.steps{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin:0 0 14px}
+.step{display:flex;align-items:center;gap:9px;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+.step .n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:#3a4658;color:#dfe5ee;flex:none}
+.step.on .n{background:linear-gradient(180deg,var(--or2),#ec760a);color:#fff;box-shadow:0 0 0 4px rgba(247,147,30,.18)}
+.step.done .n{background:var(--okbd);color:#fff}
+.step b{display:block;font-size:15px}.step span{display:block;font-size:12px;color:var(--tx2)}
+.arrow{flex:1;height:2px;background:var(--bd);min-width:14px;position:relative}.arrow:after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--bd)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:1000px){.grid{grid-template-columns:minmax(380px,440px) 1fr;align-items:start}.colL{position:sticky;top:12px}}
+.colL,.colR{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
+.card h2{margin:0 0 12px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2 .num{color:var(--or)}.card h2 small{margin-left:auto;font-weight:400;color:var(--tx2);font-size:13px}
+details.card>summary{list-style:none;cursor:pointer;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary:after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--tx2);border-bottom:2px solid var(--tx2);transform:rotate(45deg);transition:transform .15s}
+details.card[open]>summary:after{transform:rotate(-135deg)}
+details.card[open]>summary{margin-bottom:12px}
+details.card>summary small{font-weight:400;color:var(--tx2);font-size:13px}
+.lbl{font-size:12px;color:var(--tx2);display:block;margin-bottom:3px}
+input[type=number],input[type=text],input[type=email],input[type=password],select{width:100%;background:var(--card2);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;min-width:0;text-align:left}
+input[type=number]{text-align:center;-moz-appearance:textfield}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input:focus,select:focus{outline:2px solid var(--or);outline-offset:-1px}
+button{cursor:pointer}
+.btn{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.btn:hover{border-color:var(--tx3)}.btn svg{width:18px;height:18px;flex:none}
+.btn.or{background:linear-gradient(180deg,var(--or2),#ec760a);border-color:var(--or);color:#fff;box-shadow:0 6px 18px rgba(247,147,30,.25)}
+.btn.big{width:100%;padding:15px;font-size:18px;border-radius:13px}.btn.big svg{width:22px;height:22px}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.sm{padding:6px 10px;font-size:14px;border-radius:8px}
+.pal{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;display:grid;grid-template-columns:62px 1fr;gap:10px;margin-bottom:10px}
+.pal .ico{width:62px;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1.5px solid}
+.pal .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}.pal .hd b{font-size:15px}
+.pal .hd .del{margin-left:auto;background:none;border:none;color:var(--tx3);font-size:22px;line-height:1;padding:0 4px}
+.pal .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.pal .f2{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--bd);border-radius:9px;overflow:hidden;background:var(--card2)}
+.qty button{background:none;border:none;width:36px;height:36px;font-size:20px;color:var(--tx)}
+.qty input{width:52px;border:none;border-radius:0;background:none;padding:6px 0;text-align:center}
+.tog{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--tx2);cursor:pointer;user-select:none}
+.tog input{appearance:none;width:20px;height:20px;border:1.5px solid var(--tx3);border-radius:5px;margin:0;display:grid;place-content:center;background:var(--card2)}
+.tog input:checked{background:var(--or);border-color:var(--or)}.tog input:checked:after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.add{width:100%;border:1.5px dashed var(--tx3);background:none;border-radius:11px;padding:11px;color:var(--tx);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips button{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:5px 11px;font-size:13px;color:var(--tx2)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;color:var(--tx)}
+.mode svg{width:36px;height:36px}.mode span{font-weight:400;font-size:12px;color:var(--tx2);text-align:center}
+.mode.on{background:linear-gradient(180deg,var(--or2),#ec760a);border-color:var(--or);color:#fff}.mode.on span{color:#ffe9d1}
+.row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.muted{color:var(--tx2);font-size:13px}
+.msg{font-size:14px;padding:10px 12px;border-radius:10px;margin:0}
+.msg.err{background:var(--badbg);color:var(--bad)}.msg.warn{background:var(--warnbg);color:var(--warn)}.msg.info{background:var(--card2);color:var(--tx2)}
+.prog{height:5px;background:var(--card2);border-radius:3px;overflow:hidden;margin-top:10px}.prog i{display:block;height:100%;width:0;background:var(--or)}
+.empty{text-align:center;padding:40px 16px;color:var(--tx2)}
+.empty svg{width:64px;height:64px;color:var(--tx3);margin-bottom:8px}
+.rec{border:1.5px solid var(--okbd);border-radius:var(--r);background:linear-gradient(180deg,rgba(47,154,69,.12),rgba(47,154,69,.03))}
+.rec.bad{border-color:#a8434a;background:linear-gradient(180deg,rgba(168,67,74,.15),rgba(168,67,74,.03))}
+.rec .bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:10px 14px;border-bottom:1px solid rgba(47,154,69,.35);font-weight:700;color:var(--ok)}
+.rec.bad .bar{color:var(--bad);border-color:rgba(168,67,74,.4)}
+.rec .ck{width:24px;height:24px;border-radius:50%;background:var(--okbd);display:flex;align-items:center;justify-content:center;flex:none}
+.rec.bad .ck{background:#a8434a}
+.rec .main{display:grid;grid-template-columns:1fr;gap:12px;padding:14px}
+@media(min-width:700px){.rec .main{grid-template-columns:minmax(200px,0.9fr) 1.2fr}}
+.rec .veh h3{margin:0 0 6px;font-size:21px}.rec .veh svg{width:100%;max-width:260px;height:auto;display:block}
+.stats{display:flex;flex-direction:column}.stats>div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.stats>div>span{color:var(--tx2)}.stats>div>b{font-weight:700;text-align:right}
+.meter{height:8px;border-radius:5px;background:var(--card2);overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;background:var(--ok);border-radius:5px}
+.planbox{padding:0 14px 14px}.planbox h4{margin:4px 0 8px;font-size:15px}
+.vlist{display:flex;flex-direction:column;gap:8px}
+.vitem{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 10px;cursor:pointer;text-align:left;width:100%}
+.vitem.sel{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+.vitem svg{width:70px;height:auto}.vitem b{display:block;font-size:15px}.vitem small{display:block;color:var(--tx2);font-size:12px}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge.best{background:var(--okbg);color:var(--ok)}.badge.ok{background:var(--warnbg);color:var(--warn)}.badge.no{background:var(--badbg);color:var(--bad)}
+.pct{display:block;margin-top:5px;height:6px;border-radius:4px;background:var(--card2);overflow:hidden;width:100%}.pct i{display:block;height:100%}
+.order{display:flex;flex-direction:column;gap:4px;font-size:14px}.order div{display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--bd)}
+.order .nb{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions .grow{flex:1;min-width:180px}
+.saved .it{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bd)}.saved .it:first-child{border-top:none}
+.saved .it .t{flex:1;min-width:0}.saved .it b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.saved .it span{font-size:12px;color:var(--tx2)}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=date]{width:100%;background:var(--card2);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;min-width:0;color:var(--tx);color-scheme:dark}
+.x{background:none;border:none;color:var(--tx3);font-size:20px;padding:2px 6px}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+#login form{background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.printonly{display:none}
+@media print{
+@page{size:A4;margin:10mm}.top{padding:0 0 4px}.top p{display:none}#secRes,#resBox{gap:6px!important}.order{font-size:12px}.order div{padding:2px 0!important}.card{padding:8px 10px}
+#othersCard,.rec .veh,.rec .stats,.rec .bar,.planbox>p{display:none!important}.rec .main{display:none!important}#orderCard{break-inside:auto}.order .nb{background:#fff!important;color:#111!important;border:1.5px solid #111!important}.rec .main{grid-template-columns:1fr!important;padding:6px 0}.rec{border:none!important;background:none!important}.planbox{padding:0}#orderCard{display:block}#orderCard>summary:after{display:none}
+.order div{padding:3px 0}.order .nb{-webkit-print-color-adjust:exact}
+
+@page{size:A4;margin:12mm}
+:root{--bg:#fff;--panel:#fff;--card:#fff;--card2:#f1f3f6;--tx:#111;--tx2:#555;--tx3:#888;--bd:#ccc;--ok:#1b7a2c;--okbg:#e5f4e8;--okbd:#2f9a45;--bad:#b3262e;--badbg:#fbe5e6;--warn:#8a5a00;--warnbg:#fff1d6;color-scheme:light}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.colL,.steps,.noprint,#login,.top .user{display:none!important}
+.grid{display:block}.card,.rec{break-inside:avoid;border-color:#bbb;margin-bottom:10px}
+.printonly{display:block}
+}
+@media(max-width:600px){
+.top h1{font-size:20px}.top p{display:none}.top .user span{display:none}
+.steps{padding:10px}.step span span{display:none}.step b{font-size:14px}.step .n{width:30px;height:30px}
+.vitem{grid-template-columns:62px 1fr}.vitem svg{width:62px}.vitem .badge{grid-column:2;justify-self:start}
+.rec .bar .why{margin-left:0!important;width:100%}
+}
+.wseg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}
+.wseg button{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--tx2)}
+.wseg button.on{background:var(--orbg);border-color:var(--or);color:var(--or2);font-weight:600}
+.pal.nokg .f3{grid-template-columns:1fr 1fr}.pal.nokg .kgf{display:none}
+.cobar{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:8px 10px;margin:0 0 12px}
+.cobar select{flex:1;font-weight:700;background:var(--card2)}
+#coCard{margin:0 0 12px}.mem{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bd);font-size:14px}.mem:first-child{border-top:none}.mem>span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--orbg);color:var(--or2)}
+.gds{display:inline-block;vertical-align:middle;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--or2);border:1.5px solid var(--or);border-radius:6px;padding:1px 6px;margin-left:4px;position:relative;top:-2px}
+.foot{text-align:center;color:var(--tx3);font-size:12px;padding:22px 10px 6px;line-height:1.6}.foot b{color:var(--tx2);font-weight:600}
+@media print{.foot{color:#555;padding:10px 0 0;font-size:10px}.gds{color:#c56a00;border-color:#c56a00}}
+</style>
+</head>
+<body>
+<div id="login"><form id="lf">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 4l18 10v20L24 44 6 34V14z"/><path d="M6 14l18 10 18-10M24 24v20"/></svg><div><b style="font-size:20px">Cargo Planner <span style="color:#f7931e">Pro</span> <span class="gds">GDS</span></b><div class="muted">Zaloguj się, aby kontynuować</div></div></div>
+<div><label class="lbl" for="le">E-mail</label><input id="le" type="email" autocomplete="username" required></div>
+<div><label class="lbl" for="lp">Hasło</label><input id="lp" type="password" autocomplete="current-password" required></div>
+<button class="btn or" type="submit" id="lb" style="padding:12px">Zaloguj</button>
+<button type="button" id="lr" style="background:none;border:none;color:#f7931e;font-size:14px">Nie pamiętam hasła</button>
+<div id="lmsg" class="muted"></div><div class="muted" style="font-size:11px;text-align:center;border-top:1px solid var(--bd);padding-top:10px">© 2026 Łukasz Grudka · Grudka Digital System (GDS)</div></form></div>
+<div class="app">
+<header class="top">
+<svg class="logo" width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.6" stroke-linejoin="round" aria-hidden="true"><path d="M24 4l18 10v20L24 44 6 34V14z"/><path d="M6 14l18 10 18-10M24 24v20"/></svg>
+<div><h1>Cargo Planner <em>Pro</em> <span class="gds">GDS</span></h1><p>Planer załadunku · Dobór pojazdu · Plan ustawienia · Masa ładunku</p></div>
+<div class="user"><button class="btn sm or" id="install" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Zainstaluj</button><span id="who"></span><button class="iconbtn" id="logout" title="Wyloguj" aria-label="Wyloguj" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
+</header>
+
+<p class="msg info" id="installHelp" hidden style="margin:0 0 12px">Na iPhonie/iPadzie: otwórz w Safari, stuknij <b>Udostępnij</b> → <b>Do ekranu początkowego</b>. Na komputerze: w Chrome lub Edge kliknij ikonę instalacji po prawej stronie paska adresu.</p>
+<div class="cobar" id="coBar" hidden>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f7931e" stroke-width="2"><path d="M3 21V7l7-4v18M10 21h11V10l-11-3M14 13h3M14 17h3M6 10h1M6 14h1"/></svg>
+<select id="coSel" aria-label="Firma"></select>
+<button class="btn sm" id="coBtn">Firmy i dostęp</button>
+</div>
+<details class="card" id="coCard" hidden><summary>Firmy i dostęp</summary><div id="coBody"></div></details>
+<section class="card" id="coFirst" hidden>
+<h2>Utwórz pierwszą firmę</h2>
+<p class="muted" style="margin:0 0 10px">Każda firma ma osobne zapisane plany. Widzą je tylko osoby, które do niej dodasz.</p>
+<div class="row"><input type="text" id="coNewFirst" placeholder="np. Meble TORA" style="flex:1"><button class="btn or" id="coCreateFirst">Utwórz</button></div>
+<p class="muted" id="coFirstMsg" style="margin:6px 0 0"></p>
+</section>
+<nav class="steps" aria-label="Kroki">
+<button class="step on" data-step="1" data-go="secLoad"><span class="n">1</span><span><b>Ładunek</b><span>Wymiary, ilość, waga</span></span></button><i class="arrow"></i>
+<button class="step" data-step="2" data-go="secMode"><span class="n">2</span><span><b>Pojazd</b><span>Dobór lub sprawdzenie</span></span></button><i class="arrow"></i>
+<button class="step" data-step="3" data-go="secRes"><span class="n">3</span><span><b>Wynik</b><span>Plan, zapis, eksport</span></span></button>
+</nav>
+
+<div class="grid">
+<div class="colL">
+
+<section class="card" id="secOrder">
+<h2>Zlecenie</h2>
+<div class="fl">
+<div><label class="lbl" for="ordNo">Numer zlecenia</label><input type="text" id="ordNo" placeholder="np. ZL/2026/154"></div>
+<div><label class="lbl" for="ordDate">Termin realizacji</label><input type="date" id="ordDate"></div>
+</div>
+</section>
+
+<section class="card" id="secLoad">
+<h2><span class="num">1.</span> Wprowadź ładunek <small id="itHint"></small></h2>
+<div class="wseg" id="wSeg"><span class="muted">Waga:</span><button data-w="each" class="on">każdej palety</button><button data-w="total">łączna całego ładunku</button></div>
+<div id="totalBox" hidden style="margin:0 0 12px"><label class="lbl" for="totalKg">Łączna waga towaru (kg)</label><input type="number" id="totalKg" min="0" inputmode="numeric" placeholder="np. 3000"></div>
+<div id="items"></div>
+<button class="add" id="addItem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Dodaj kolejny ładunek</button>
+<div class="chips"><button data-q="120,80">EUR 120×80</button><button data-q="120,100">Przemysłowa 120×100</button><button data-q="80,60">Półpaleta 80×60</button></div>
+</section>
+
+<section class="card" id="secMode">
+<h2><span class="num">2.</span> Kryterium planu</h2>
+<div class="modes">
+<button class="mode on" data-m="pick"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="9" width="17" height="13" rx="1.5"/><path d="M19 13h6l4 5v4h-10z"/><circle cx="8" cy="24" r="2.5" fill="currentColor"/><circle cx="24" cy="24" r="2.5" fill="currentColor"/><path d="M8 12.5l2 2 4-4" stroke-width="2.2"/></svg>Dobierz mi auto<span>Podpowie, jakie auto zamówić</span></button>
+<button class="mode" data-m="have"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="9" width="17" height="13" rx="1.5"/><path d="M19 13h6l4 5v4h-10z"/><circle cx="8" cy="24" r="2.5" fill="currentColor"/><circle cx="24" cy="24" r="2.5" fill="currentColor"/></svg>Mam już auto<span>Sprawdzi, czy wszystko się zmieści</span></button>
+</div>
+<div id="haveBox" hidden style="margin-top:12px">
+<label class="lbl" for="vehSel">Auto od przewoźnika</label><select id="vehSel"></select>
+<p class="muted" id="vehInfo" style="margin:6px 0 0"></p>
+</div>
+<details style="margin-top:14px" id="paramBox">
+<summary class="muted" style="cursor:pointer;font-weight:600">Parametry (opcjonalnie)</summary>
+<div style="display:flex;flex-direction:column;gap:10px;margin-top:10px">
+<label class="tog"><input type="checkbox" id="useKg" checked> Uwzględnij wagę ładunku (ładowność auta)</label>
+<div class="row"><label class="tog" style="flex:1"><input type="checkbox" id="useRes"> Zostaw zapas miejsca z tyłu</label><select id="res" style="width:90px"><option>5</option><option selected>10</option><option>15</option><option>20</option></select><span class="muted">%</span></div>
+<div class="row"><span class="muted" style="flex:1">Luz między paletami</span><input type="number" id="gap" min="0" value="0" style="width:80px"><span class="muted">cm</span></div>
+</div>
+</details>
+</section>
+
+
+
+<div>
+<button class="btn or big" id="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg><span id="goTxt">Oblicz najlepsze rozwiązanie</span></button>
+<div class="prog" id="prog" hidden><i></i></div>
+<div id="msgs" style="margin-top:10px"></div>
+</div>
+
+</div>
+<div class="colR">
+
+<section id="secRes">
+<div class="card empty" id="emptyRes"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M24 4l18 10v20L24 44 6 34V14z"/><path d="M6 14l18 10 18-10M24 24v20"/></svg><div style="font-weight:700;color:var(--tx);font-size:16px">Tu pojawi się plan załadunku</div><div>Wprowadź palety, wybierz kryterium i kliknij „Oblicz najlepsze rozwiązanie”.</div></div>
+<div id="resBox" hidden style="display:flex;flex-direction:column;gap:14px">
+<div class="printonly" id="printHead"></div>
+<div class="rec" id="recCard"></div>
+<div class="card" id="othersCard"><h2>Inne możliwe pojazdy <small id="othersHint"></small></h2><div class="vlist" id="others"></div></div>
+<details class="card" id="orderCard"><summary>Kolejność załadunku <small id="orderHint"></small></summary><div class="order" id="order"></div></details>
+<div class="printonly"><div style="display:flex;gap:30px;margin-top:22px;font-size:12px;color:#555"><div style="flex:1;border-top:1px solid #999;padding-top:4px">Załadował (data, podpis)</div><div style="flex:1;border-top:1px solid #999;padding-top:4px">Kierowca (podpis)</div></div></div>
+<div class="card noprint">
+<h2>Gotowy plan</h2>
+<div class="actions">
+<input type="text" id="planName" class="grow" placeholder="Nazwa planu (domyślnie numer zlecenia)">
+<button class="btn or" id="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>Zapisz plan</button>
+</div>
+<div class="actions" style="margin-top:8px">
+<button class="btn" id="pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>PDF / Drukuj</button>
+<button class="btn" id="png"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Obraz (PNG)</button>
+<button class="btn" id="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg>Kopiuj opis</button>
+<button class="btn" id="newPlan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nowy plan</button>
+</div>
+<div id="saveMsg" style="margin-top:8px"></div>
+<textarea id="copyBox" hidden style="width:100%;min-height:130px;margin-top:8px;font:13px/1.4 ui-monospace,monospace;background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:9px;padding:8px"></textarea>
+</div>
+</div>
+</section>
+
+<details class="card saved noprint" id="secSaved">
+<summary>Moje plany <small id="savedHint">ładowanie…</small></summary>
+<div id="savedList"></div>
+</details>
+
+</div>
+</div>
+
+</div>
+
+<script>
+const PRESETS=[
+{id:'p-bus',name:'Bus',L:420,W:210,P:1100},
+{id:'p-busmaxi',name:'Bus MAXI (10 EP)',L:485,W:220,P:1000},
+{id:'p-solo75',name:'Solówka 7,5 t',L:620,W:245,P:3000},
+{id:'p-solo12',name:'Solówka 12 t',L:720,W:245,P:6000},
+{id:'p-solo18',name:'Solówka 18 t',L:820,W:245,P:9000},
+{id:'p-tir',name:'TIR / naczepa 13,6 m',L:1360,W:248,P:24000}];
+const COLORS=[['#f7a43a','#3a2710'],['#62b4f7','#0f2c47'],['#ab9df7','#2a2350'],['#ff8f8f','#4a1d22'],['#5fd6a7','#0f3a2d'],['#f293c6','#431f39'],['#a8d862','#283a12'],['#c5cad2','#2c3139']];
+const LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+let fleet=[],items=[
+{l:140,w:90,q:5,kg:250,front:false,rot:true},{l:130,w:80,q:3,kg:200,front:false,rot:true},{l:120,w:80,q:2,kg:200,front:false,rot:true},{l:180,w:80,q:1,kg:600,front:true,rot:true}];
+let companies=[],cid=null,multi=false,subs=[],wMode='each',mode='pick',vehId='p-solo75',result=null,currentPlanId=null,currentPlanName='',db=null,myId='',myName='',savedDocs=[],running=false;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('pl-PL');
+const m2=cm=>(cm/100).toFixed(2).replace('.',',');
+const allVehicles=()=>[...PRESETS,...fleet];
+const curVeh=()=>allVehicles().find(v=>v.id===vehId)||PRESETS[2];
+const vObj=v=>({name:v.name,L:v.L,W:v.W,P:v.P});
+
+function truckSvg(v,w){const big=v.L>1000,bus=v.L<520;const c='#d9dee6',d='#8d97a6';
+if(bus)return`<svg viewBox="0 0 120 56" ${w?`width="${w}"`:''} aria-hidden="true"><path d="M8 14h78l18 12 8 4v14H8z" fill="${c}" stroke="${d}"/><path d="M86 16l14 11H86z" fill="#5b6b80"/><rect x="12" y="18" width="16" height="9" rx="1.5" fill="#5b6b80"/><circle cx="28" cy="45" r="7" fill="#1d232c" stroke="${d}" stroke-width="2"/><circle cx="92" cy="45" r="7" fill="#1d232c" stroke="${d}" stroke-width="2"/></svg>`;
+if(big)return`<svg viewBox="0 0 160 56" ${w?`width="${w}"`:''} aria-hidden="true"><rect x="4" y="8" width="118" height="34" rx="2" fill="${c}" stroke="${d}"/><path d="M126 16h18l10 12v14h-28z" fill="#e8ebf0" stroke="${d}"/><path d="M130 19h12l7 8h-19z" fill="#5b6b80"/><rect x="118" y="42" width="40" height="3" fill="${d}"/>${[20,34,48,138].map(x=>`<circle cx="${x}" cy="47" r="6" fill="#1d232c" stroke="${d}" stroke-width="2"/>`).join('')}</svg>`;
+return`<svg viewBox="0 0 130 58" ${w?`width="${w}"`:''} aria-hidden="true"><rect x="38" y="6" width="88" height="38" rx="2" fill="${c}" stroke="${d}"/><path d="M6 20h30v26H4V30z" fill="#e8ebf0" stroke="${d}"/><path d="M9 23h22v10H6z" fill="#5b6b80"/><rect x="4" y="44" width="122" height="3" fill="${d}"/><circle cx="22" cy="49" r="7" fill="#1d232c" stroke="${d}" stroke-width="2"/><circle cx="100" cy="49" r="7" fill="#1d232c" stroke="${d}" stroke-width="2"/><circle cx="114" cy="49" r="7" fill="#1d232c" stroke="${d}" stroke-width="2"/></svg>`}
+const palIco=c=>`<svg width="40" height="30" viewBox="0 0 40 30" aria-hidden="true"><path d="M4 12l16-8 16 8-16 8z" fill="${c[0]}" opacity=".95"/><path d="M4 12v6l16 8v-6zM36 12v6l-16 8v-6z" fill="${c[0]}" opacity=".6"/><path d="M9 14.5l16-8M14 17l16-8" stroke="${c[1]}" stroke-width="1.6"/></svg>`;
+
+/* ---------- STEPS ---------- */
+function setStep(n){document.querySelectorAll('.step').forEach(s=>{const k=+s.dataset.step;s.classList.toggle('on',k===n);s.classList.toggle('done',k<n)})}
+document.querySelectorAll('.step').forEach(s=>s.onclick=()=>{const el=$(s.dataset.go);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+
+/* ---------- ITEMS ---------- */
+function renderItems(){$('items').innerHTML=items.map((it,i)=>{const c=COLORS[i%COLORS.length];return`<div class="pal${wMode==='total'?' nokg':''}" data-i="${i}">
+<div class="ico" style="background:${c[1]};border-color:${c[0]}">${palIco(c)}</div>
+<div><div class="hd"><b>Paleta ${LETTERS[i]||i+1}</b><span class="muted" style="font-size:12px">${it.l&&it.w?it.l+'×'+it.w+' cm':''}</span><button class="del" data-rm="${i}" aria-label="Usuń paletę">×</button></div>
+<div class="f3"><div><label class="lbl">Długość (cm)</label><input type="number" min="1" inputmode="numeric" data-k="l" value="${it.l||''}"></div>
+<div><label class="lbl">Szerokość (cm)</label><input type="number" min="1" inputmode="numeric" data-k="w" value="${it.w||''}"></div>
+<div class="kgf"><label class="lbl">Waga (kg/szt.)</label><input type="number" min="0" inputmode="numeric" data-k="kg" value="${it.kg??''}"></div></div>
+<div class="f2"><span class="muted">Ilość</span><span class="qty"><button data-d="-1" aria-label="Mniej">−</button><input type="number" min="1" inputmode="numeric" data-k="q" value="${it.q||''}"><button data-d="1" aria-label="Więcej">+</button></span>
+<label class="tog" style="margin-left:auto"><input type="checkbox" data-k="front" ${it.front?'checked':''}>Przy kabinie</label></div>
+<div class="f2" style="margin-top:6px"><label class="tog"><input type="checkbox" data-k="rot" ${it.rot!==false?'checked':''}>Ustaw najkorzystniej (obracaj)</label><span class="muted" style="font-size:12px">${it.rot===false?'długość zawsze wzdłuż auta':''}</span></div></div></div>`}).join('')||'<p class="muted" style="margin:0 0 10px">Dodaj pierwszą paletę.</p>';hint()}
+function totalKg(){return wMode==='total'?Math.max(0,+$('totalKg').value||0):items.reduce((a,b)=>a+(+b.q||0)*(+b.kg||0),0)}
+function hint(){const n=items.reduce((a,b)=>a+(+b.q||0),0),kg=totalKg();$('itHint').textContent=n+' szt. · '+fmt(kg)+' kg'}
+$('items').addEventListener('input',e=>{const row=e.target.closest('.pal');if(!row)return;const it=items[+row.dataset.i],k=e.target.dataset.k;if(!k)return;if(k==='front')it.front=e.target.checked;else if(k==='rot'){it.rot=e.target.checked;renderItems();return}else it[k]=e.target.value===''?'':+e.target.value;hint();setStep(1)});
+$('items').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){items.splice(+rm.dataset.rm,1);renderItems();return}
+const d=e.target.closest('[data-d]');if(d){const row=d.closest('.pal');const it=items[+row.dataset.i];it.q=Math.max(1,(+it.q||0)+(+d.dataset.d));row.querySelector('[data-k=q]').value=it.q;hint()}});
+function addItem(l,w){items.push({l:l||'',w:w||'',q:1,kg:'',front:false,rot:true});renderItems();const rows=$('items').querySelectorAll('.pal');const last=rows[rows.length-1];if(last){last.scrollIntoView({block:'nearest'});last.querySelector(l?'[data-k=kg]':'[data-k=l]').focus()}}
+$('addItem').onclick=()=>addItem();
+function setWMode(w){wMode=w;document.querySelectorAll('#wSeg button').forEach(b=>b.classList.toggle('on',b.dataset.w===w));$('totalBox').hidden=w!=='total';renderItems();if(w==='total'&&!$('totalKg').value){const s=items.reduce((a,b)=>a+(+b.q||0)*(+b.kg||0),0);if(s)$('totalKg').value=s}}
+document.querySelectorAll('#wSeg button').forEach(b=>b.onclick=()=>setWMode(b.dataset.w));
+$('totalKg').addEventListener('input',()=>{hint();setStep(1)});
+document.querySelectorAll('.chips button').forEach(b=>b.onclick=()=>{const q=b.dataset.q.split(',').map(Number);addItem(q[0],q[1])});
+
+/* ---------- MODE / VEHICLES ---------- */
+function setMode(m){mode=m;document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$('haveBox').hidden=m!=='have';$('goTxt').textContent=m==='pick'?'Oblicz najlepsze rozwiązanie':'Sprawdź, czy się zmieści'}
+document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{setMode(b.dataset.m);setStep(2)});
+function renderVeh(){const sel=$('vehSel');sel.innerHTML='<optgroup label="Typowe">'+PRESETS.map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('')+'</optgroup>'+(fleet.length?'<optgroup label="Baza pojazdów">'+fleet.map(v=>`<option value="${esc(v.id)}">${esc(v.name)}</option>`).join('')+'</optgroup>':'');
+if(!allVehicles().some(v=>v.id===vehId))vehId='p-solo75';sel.value=vehId;const v=curVeh();$('vehInfo').textContent=`${m2(v.L)} × ${m2(v.W)} m · ładowność ${fmt(v.P)} kg`;
+}
+$('vehSel').onchange=e=>{vehId=e.target.value;renderVeh();setStep(2)};
+
+/* ---------- PACKING ---------- */
+function packMR(order,W){const BIG=1e6;let F=[{x:0,y:0,l:BIG,w:W}];const P=[];
+for(const it of order){let best=null;const rots=it.r===1?[[it.a,it.b]]:it.r===2?[[it.b,it.a]]:[[it.a,it.b],[it.b,it.a]];
+for(const f of F)for(const[l,w]of rots){if(l<=f.l&&w<=f.w){const s1=f.x+l,s2=f.y;if(!best||s1<best.s1||(s1===best.s1&&s2<best.s2))best={x:f.x,y:f.y,l,w,s1,s2}}}
+if(!best)return null;const r={x:best.x,y:best.y,l:best.l,w:best.w,g:it.g,kg:it.kg,front:it.front};P.push(r);const NF=[];
+for(const f of F){if(r.x>=f.x+f.l||r.x+r.l<=f.x||r.y>=f.y+f.w||r.y+r.w<=f.y){NF.push(f);continue}
+if(r.x>f.x)NF.push({x:f.x,y:f.y,l:r.x-f.x,w:f.w});if(r.x+r.l<f.x+f.l)NF.push({x:r.x+r.l,y:f.y,l:f.x+f.l-r.x-r.l,w:f.w});
+if(r.y>f.y)NF.push({x:f.x,y:f.y,l:f.l,w:r.y-f.y});if(r.y+r.w<f.y+f.w)NF.push({x:f.x,y:r.y+r.w,l:f.l,w:f.y+f.w-r.y-r.w})}
+F=NF.filter((a,i)=>!NF.some((b,j)=>j!==i&&b.x<=a.x&&b.y<=a.y&&b.x+b.l>=a.x+a.l&&b.y+b.w>=a.y+a.w&&(j<i||!(a.x===b.x&&a.y===b.y&&a.l===b.l&&a.w===b.w))))}return P}
+const plen=P=>P.length?Math.max(...P.map(p=>p.x+p.l)):0;
+function saRun(fixed,free,W,iters){let cur=[...free].sort((p,q)=>q.a*q.b-p.a*p.b).map(i=>({...i,r:i.rot===false?1:0}));if(Math.random()<.6)for(let k=0;k<cur.length;k++){const a=Math.floor(Math.random()*cur.length);[cur[k],cur[a]]=[cur[a],cur[k]]}
+const run=n=>packMR([...fixed,...n],W);let cP=run(cur);if(!cP)return null;let cL=plen(cP),best=cP,bL=cL;const N=cur.length;if(N<2)return best;
+for(let t=0;t<iters;t++){const n=cur.map(i=>({...i}));const k=Math.random();
+if(k<.5){const a=Math.floor(Math.random()*N),b=Math.floor(Math.random()*N);[n[a],n[b]]=[n[b],n[a]]}
+else if(k<.8){const j=Math.floor(Math.random()*N);if(n[j].rot!==false)n[j].r=Math.floor(Math.random()*3)}
+else{const x=n.splice(Math.floor(Math.random()*N),1)[0];n.splice(Math.floor(Math.random()*N),0,x)}
+const P=run(n);if(!P)continue;const L=plen(P),T=20*(1-t/iters)+.1;
+if(L<=cL||Math.random()<Math.exp((cL-L)/T)){cur=n;cL=L;if(L<bL){bL=L;best=P}}}return best}
+async function packFor(list,gap,VW,budget,onProg){const W=VW+gap;
+const fixed=list.filter(x=>x.front).sort((p,q)=>q.kg-p.kg).map(x=>{if(!x.rot)return{...x,r:1};const across=Math.max(x.a,x.b)<=W;return{...x,r:across?(x.a<=x.b?1:2):0}});const free=list.filter(x=>!x.front);
+const iters=Math.max(300,Math.round(40000/Math.max(1,list.length)));const t0=performance.now();let best=null;
+while(true){const P=saRun(fixed,free,W,iters);if(P&&(!best||plen(P)<plen(best)))best=P;const el=performance.now()-t0;onProg(Math.min(1,el/budget));if(el>budget||!free.length)break;await new Promise(r=>setTimeout(r,0))}
+if(!best)return null;const lay=best.map(p=>({x:p.x,y:p.y,l:p.l-gap,w:p.w-gap,g:p.g,kg:p.kg,front:p.front}));
+for(const p of lay){if(!p.front)continue;const alone=!lay.some(o=>o!==p&&o.x<p.x+p.l&&o.x+o.l>p.x);if(alone)p.y=(VW-p.w)/2}return lay}
+
+/* ---------- CALCULATE ---------- */
+function msg(html,cls='err'){$('msgs').innerHTML=html?`<p class="msg ${cls}">${html}</p>`:''}
+function buildList(){const gap=Math.max(0,+$('gap').value||0);const list=[];
+for(let i=0;i<items.length;i++){const it=items[i];const l=+it.l,w=+it.w,q=Math.round(+it.q||0);if(!(l>0&&w>0&&q>0))return{err:`Uzupełnij wymiary i ilość palety ${LETTERS[i]||i+1}.`};for(let k=0;k<q;k++)list.push({a:l+gap,b:w+gap,g:i,kg:+it.kg||0,front:!!it.front,rot:it.rot!==false,ol:l,ow:w})}
+if(!list.length)return{err:'Dodaj przynajmniej jedną paletę.'};
+if(wMode==='total'){const T=Math.max(0,+$('totalKg').value||0);const A=list.reduce((a,x)=>a+x.ol*x.ow,0);list.forEach(x=>x.kg=A?T*x.ol*x.ow/A:0)}if(list.length>200)return{err:'Maksymalnie 200 palet w jednym planie.'};return{list,gap}}
+function evalOpt(v,lay,kg,o){const length=Math.max(...lay.map(p=>p.x+p.l));const area=lay.reduce((a,p)=>a+p.l*p.w,0);const Lmax=o.useRes?Math.floor(v.L*(1-o.res/100)):v.L;
+const fitL=length<=Lmax,fitP=!o.useKg||kg<=v.P;return{veh:vObj(v),lay,length,Lmax,fitL,fitP,ok:fitL&&fitP,useA:Math.round(area/(v.L*v.W)*100),useP:v.P?Math.round(kg/v.P*100):0}}
+async function calculate(){if(running)return;msg('');const b=buildList();if(b.err){msg(b.err);return}const{list,gap}=b;
+const kg=Math.round(list.reduce((a,x)=>a+x.kg,0)),mm=Math.max(...list.map(x=>x.rot?Math.min(x.ol,x.ow):x.ow));const o={useKg:$('useKg').checked,useRes:$('useRes').checked,res:+$('res').value};
+const pr=$('prog'),bar=pr.firstElementChild,total=Math.min(4000,1500+list.length*40);
+running=true;$('go').disabled=true;$('goTxt').textContent='Liczę najlepsze ułożenie…';pr.hidden=false;bar.style.width='0';
+try{let opts=[],sel;
+if(mode==='have'){const v=curVeh();if(mm>v.W){msg(`Najszersza paleta (${mm} cm) nie zmieści się w aucie o szerokości ${v.W} cm.`);return}
+const lay=await packFor(list,gap,v.W,total,p=>bar.style.width=p*100+'%');if(!lay){msg('Nie udało się ułożyć palet. Sprawdź wymiary.');return}
+sel=evalOpt(v,lay,kg,o);opts=[sel]}
+else{const vs=allVehicles().filter(v=>v.W>=mm);if(!vs.length){msg(`Najszersza paleta (${mm} cm) nie zmieści się w żadnym aucie.`);return}
+const widths=[...new Set(vs.map(v=>v.W))].sort((a,b)=>a-b);const per=Math.max(600,total/widths.length);const byW={};
+for(let i=0;i<widths.length;i++)byW[widths[i]]=await packFor(list,gap,widths[i],per,p=>bar.style.width=((i+p)/widths.length*100)+'%');
+opts=vs.filter(v=>byW[v.W]).map(v=>evalOpt(v,byW[v.W],kg,o)).sort((a,b)=>a.veh.L*a.veh.W-b.veh.L*b.veh.W||a.veh.P-b.veh.P);
+if(!opts.length){msg('Nie udało się ułożyć palet. Sprawdź wymiary.');return}
+sel=opts.find(x=>x.ok)||[...opts].sort((a,b)=>(a.length-a.Lmax)-(b.length-b.Lmax))[0]}
+const best=opts.find(x=>x.ok);opts.forEach(x=>x.status=!x.ok?'no':x===best?'best':'ok');
+result={ord:$('ordNo').value.trim(),due:$('ordDate').value,mode,wMode,opts,sel:opts.indexOf(sel),kg,gap,o,items:items.map(x=>({...x})),at:new Date().toISOString()};
+if(mode==='pick'&&!best)msg('Cały ładunek nie zmieści się na żadne auto. Podziel go na dwa kursy.','warn');
+currentPlanId=null;currentPlanName='';showResult();setStep(3);if(window.innerWidth<1000)$('secRes').scrollIntoView({behavior:'smooth',block:'start'})}
+finally{running=false;$('go').disabled=false;setMode(mode);pr.hidden=true}}
+$('go').onclick=calculate;
+
+/* ---------- DRAW ---------- */
+let printing=false;const isVert=()=>!printing&&window.innerWidth<640;
+addEventListener('afterprint',()=>{if(printing){printing=false;if(result)showResult()}});
+function drawPlan(r,o,vert,forExport){const v=o.veh,lay=o.lay;const Ldraw=Math.max(v.L,o.length);const cab=vert?44:52;const pad=26;
+const S=forExport&&!printing?Math.min(1100/Ldraw,4):printing?Math.min(760/Ldraw,3):vert?Math.min((Math.min(window.innerWidth,640)-110)/v.W,2.3):Math.min(760/Ldraw,3);
+const T=vert?(x,y,l,w)=>({x:pad+y*S,y:cab+10+x*S,pw:w*S,ph:l*S}):(x,y,l,w)=>({x:cab+10+x*S,y:pad+y*S,pw:l*S,ph:w*S});
+const box=T(0,0,Ldraw,v.W),tr=T(0,0,v.L,v.W);const VW=vert?box.x+box.pw+40:box.x+box.pw+80,VH=vert?box.y+box.ph+14:box.y+box.ph+16;
+const order=lay.map((p,i)=>i).sort((a,b)=>lay[a].x-lay[b].x||lay[a].y-lay[b].y);const num={};order.forEach((i,k)=>num[i]=k+1);
+if(printing)forExport=true;const ink=forExport?'#111':'var(--tx)',ink2=forExport?'#555':'var(--tx2)',bg=forExport?'#fff':'var(--card)';
+let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VW} ${VH}" width="${forExport&&!printing?VW*2:'100%'}" ${forExport&&!printing?`height="${VH*2}"`:''} style="display:block;margin:0 auto;max-width:${vert?VW+'px':'100%'}" role="img" aria-label="Plan ustawienia, widok z góry"><rect width="${VW}" height="${VH}" fill="${forExport?'#fff':'none'}"/>`;
+if(vert)s+=`<path d="M${tr.x+10} ${cab+6}V18q0-14 14-14h${tr.pw-48}q14 0 14 14V${cab+6}z" fill="#dfe3e9" stroke="#8d97a6"/><rect x="${tr.x+22}" y="10" width="${tr.pw-44}" height="${cab-26}" rx="4" fill="#5b6b80"/>`;
+else s+=`<path d="M${cab+6} ${tr.y+10}H18q-14 0-14 14v${tr.ph-48}q0 14 14 14H${cab+6}z" fill="#dfe3e9" stroke="#8d97a6"/><rect x="10" y="${tr.y+22}" width="${cab-26}" height="${tr.ph-44}" rx="4" fill="#5b6b80"/>`;
+s+=`<rect x="${tr.x}" y="${tr.y}" width="${tr.pw}" height="${tr.ph}" fill="${bg}" stroke="#c7ced8" stroke-width="2.5"/>`;
+if(o.length>v.L){const q=T(v.L,0,o.length-v.L,v.W);s+=`<rect x="${q.x}" y="${q.y}" width="${q.pw}" height="${q.ph}" fill="rgba(255,90,90,.15)" stroke="#ff7b7b" stroke-dasharray="5 4"/>`}
+else if(o.Lmax<v.L){const q=T(o.Lmax,0,v.L-o.Lmax,v.W);s+=`<rect x="${q.x}" y="${q.y}" width="${q.pw}" height="${q.ph}" fill="none" stroke="#ffbf5e" stroke-dasharray="4 4"/>`}
+lay.forEach((p,i)=>{const c=COLORS[p.g%COLORS.length];const q=T(p.x,p.y,p.l,p.w);const it=r.items[p.g];const fill=forExport?c[0]+'55':c[1],st=c[0],tx=forExport?'#111':c[0];
+s+=`<rect x="${q.x+1.5}" y="${q.y+1.5}" width="${Math.max(1,q.pw-3)}" height="${Math.max(1,q.ph-3)}" rx="3" fill="${fill}" stroke="${st}" stroke-width="1.6"/>`;
+const cx=q.x+q.pw/2,cy=q.y+q.ph/2,mn=Math.min(q.pw,q.ph);const fN=Math.max(11,Math.min(22,mn/3)),fL=Math.max(9,Math.min(12,mn/5.5));
+s+=`<text x="${cx}" y="${cy+(mn>58?-2:fN/3)}" text-anchor="middle" font-size="${fN}" font-weight="800" fill="${tx}">${num[i]}</text>`;
+if(mn>58)s+=`<text x="${cx}" y="${cy+fL+6}" text-anchor="middle" font-size="${fL}" fill="${tx}" opacity=".85">${it.l}×${it.w}</text>`});
+const A='stroke="'+ink2+'" stroke-width="1.2"';
+if(vert){const x=tr.x+tr.pw+16;s+=`<path d="M${x} ${tr.y}V${tr.y+tr.ph}M${x-5} ${tr.y}h10M${x-5} ${tr.y+tr.ph}h10" ${A}/><text x="${x+6}" y="${tr.y+tr.ph/2}" font-size="13" fill="${ink}" font-weight="700" transform="rotate(90 ${x+6} ${tr.y+tr.ph/2})" text-anchor="middle">${m2(v.L)} m</text>`;
+s+=`<path d="M${tr.x} ${cab+5}" />`;}
+else{const y=tr.y-12;s+=`<path d="M${tr.x} ${y}H${tr.x+tr.pw}M${tr.x} ${y-5}v10M${tr.x+tr.pw} ${y-5}v10" ${A}/><text x="${tr.x+tr.pw/2}" y="${y-5}" text-anchor="middle" font-size="13" font-weight="700" fill="${ink}">${m2(v.L)} m</text>`;
+const x=tr.x+tr.pw+16;s+=`<path d="M${x} ${tr.y}V${tr.y+tr.ph}M${x-5} ${tr.y}h10M${x-5} ${tr.y+tr.ph}h10" ${A}/><text x="${x+8}" y="${tr.y+tr.ph/2+4}" font-size="13" font-weight="700" fill="${ink}">${m2(v.W)} m</text>`}
+return s+'</svg>'}
+
+/* ---------- RESULT ---------- */
+function showResult(){const r=result;if(!r)return;$('emptyRes').hidden=true;$('resBox').hidden=false;const o=r.opts[r.sel],v=o.veh,kg=r.kg;
+const free=Math.max(0,v.L-o.length);const cg=kg?o.lay.reduce((a,p)=>a+p.kg*(p.x+p.l/2),0)/kg:0;const nP=o.lay.length;
+const okLbl=r.mode==='have'?(o.ok?'Ładunek zmieści się w tym aucie':'Ładunek nie zmieści się w tym aucie'):(o.status==='best'?'Zamów ten pojazd':o.ok?'Wybrany pojazd (możliwy, ale nieoptymalny)':'Wybrany pojazd – za mały');
+const reasons=[];if(!o.fitL)reasons.push(o.length>v.L?`brakuje ${o.length-v.L} cm długości`:`przekroczony zapas miejsca (${r.o.res}%)`);if(!o.fitP)reasons.push(`przekroczona ładowność o ${fmt(kg-v.P)} kg`);
+$('recCard').className='rec'+(o.ok?'':' bad');
+$('recCard').innerHTML=`<div class="bar"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5">${o.ok?'<path d="M5 12l5 5 9-10"/>':'<path d="M6 6l12 12M18 6L6 18"/>'}</svg></span>${okLbl}${reasons.length?`<span class="why" style="font-weight:400;font-size:13px;margin-left:auto">${reasons.join(' · ')}</span>`:''}</div>
+<div class="main"><div class="veh"><h3>${esc(v.name)}</h3>${truckSvg(v)}</div>
+<div class="stats"><div><span>Przestrzeń ładunkowa</span><b>${m2(v.L)} × ${m2(v.W)} m</b></div><div><span>Ładowność</span><b>${fmt(v.P)} kg</b></div>
+<div><span>Twój ładunek${r.wMode==='total'?' (łącznie)':''}</span><b style="${o.fitP?'':'color:var(--bad)'}">${fmt(kg)} kg</b></div><div><span>Liczba palet</span><b>${nP}</b></div>
+<div><span>Zajęta długość</span><b style="${o.fitL?'':'color:var(--bad)'}">${o.length} cm${free?` (wolne ${free} cm)`:''}</b></div>
+${kg?`<div><span>Środek ciężkości${r.wMode==='total'?' (szac.)':''}</span><b>${Math.round(cg)} cm od kabiny</b></div>`:''}
+<div style="display:block;border:none"><span style="display:flex;justify-content:space-between"><span>Wykorzystanie podłogi</span><b style="color:var(--tx)">${o.ok||o.useA<=100?o.useA+'%':'brak miejsca'}</b></span><div class="meter"><i style="width:${Math.min(100,o.useA)}%;background:${o.ok?'var(--ok)':'var(--bad)'}"></i></div></div></div></div>
+<div class="planbox"><h4>Plan ustawienia – widok z góry (2D)</h4><div id="plan">${drawPlan(r,o,isVert())}</div><p class="muted" style="margin:8px 0 0">Numery = kolejność ustawiania od kabiny.${o.lay.some(p=>p.front)?' Palety „przy kabinie” stoją z przodu, wyśrodkowane.':''}</p></div>`;
+const others=r.opts.map((x,i)=>({x,i})).filter(z=>r.mode==='pick'||z.i!==r.sel);
+$('othersCard').hidden=r.mode==='have'||!others.length;$('othersHint').textContent=r.mode==='pick'?`sprawdzono ${r.opts.length}`:'';
+$('others').innerHTML=others.map(({x,i})=>{const lab=x.status==='best'?'Najlepszy':x.status==='ok'?'Możliwy, ale nieoptymalny':(!x.fitP&&x.fitL?'Za ciężki':'Za mały');const col=x.status==='best'?'var(--ok)':x.status==='ok'?'var(--warn)':'var(--bad)';
+const det=x.ok?`podłoga ${x.useA}% · waga ${x.useP}%`:(!x.fitL?`brakuje ${x.length-x.Lmax} cm`:'')+(!x.fitL&&!x.fitP?' · ':'')+(!x.fitP?`+${fmt(kg-x.veh.P)} kg`:'');
+return`<button class="vitem ${i===r.sel?'sel':''}" data-opt="${i}">${truckSvg(x.veh)}<span><b>${esc(x.veh.name)}</b><small>${m2(x.veh.L)} × ${m2(x.veh.W)} m · ${fmt(x.veh.P)} kg</small><small>${det}</small><span class="pct"><i style="width:${Math.min(100,x.ok?x.useA:Math.round(x.Lmax/x.length*100))}%;background:${col}"></i></span></span><span class="badge ${x.status}">${lab}</span></button>`}).join('');
+const order=o.lay.map((p,i)=>({p,i})).sort((a,b)=>a.p.x-b.p.x||a.p.y-b.p.y);$('orderHint').textContent=nP+' palet';
+$('order').innerHTML=order.map(({p},k)=>{const c=COLORS[p.g%COLORS.length];const it=r.items[p.g];const rot=(p.l===it.l&&p.w===it.w)?'wzdłuż auta':'w poprzek auta';
+return`<div><span class="nb" style="background:${c[1]};color:${c[0]};border:1px solid ${c[0]}">${k+1}</span><span style="flex:1">Paleta ${LETTERS[p.g]||p.g+1} · ${it.l}×${it.w} cm${p.kg?` · ${r.wMode==='total'?'≈':''}${fmt(p.kg)} kg`:''}</span><span class="muted">${p.x} cm od kabiny, ${rot}</span></div>`}).join('');
+const dd=r.due?new Date(r.due+'T00:00').toLocaleDateString('pl-PL'):'—';
+$('printHead').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:6px"><div><div style="font-size:12px;color:#555">Cargo Planner Pro [GDS] · arkusz załadunku</div><div style="font-size:22px;font-weight:800">Zlecenie: ${esc(r.ord||'—')}</div></div><div style="text-align:right;font-size:14px">Termin realizacji: <b>${esc(dd)}</b><br>Auto: <b>${esc(v.name)}</b> (${m2(v.L)} × ${m2(v.W)} m)</div></div>
+<div style="font-size:13px;color:#333">Palet: <b>${nP}</b> · Waga: <b>${fmt(kg)} kg</b>${r.wMode==='total'?' (łącznie)':''} · Zajęta długość: <b>${o.length} cm</b> z ${v.L} cm · ${o.ok?'<b>mieści się</b>':'<b style="color:#b3262e">NIE mieści się</b>'} · wydruk ${new Date().toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'})}</div>`}
+$('others').addEventListener('click',e=>{const b=e.target.closest('[data-opt]');if(b&&result){result.sel=+b.dataset.opt;showResult();$('recCard').scrollIntoView({behavior:'smooth',block:'start'})}});
+let lastVert=isVert();window.addEventListener('resize',()=>{const vv=isVert();if(vv!==lastVert){lastVert=vv;if(result)showResult()}});
+
+/* ---------- EXPORT ---------- */
+function summary(){if(!result)return'';const r=result,o=r.opts[r.sel];
+return[`Zlecenie: ${r.ord||'—'}${r.due?' · termin '+new Date(r.due+'T00:00').toLocaleDateString('pl-PL'):''}`,`Auto: ${o.veh.name} (${o.veh.L}×${o.veh.W} cm, ładowność ${fmt(o.veh.P)} kg)`,`Wynik: ${o.ok?'mieści się':'NIE mieści się'}; zajęte ${o.length} cm z ${o.veh.L} cm`,`Ładunek: ${o.lay.length} palet, ${fmt(r.kg)} kg${r.wMode==='total'?' (waga łączna)':''}`,...r.items.map((i,k)=>`- Paleta ${LETTERS[k]}: ${i.l}×${i.w} cm × ${i.q} szt.${r.wMode!=='total'&&i.kg?`, ${i.kg} kg/szt.`:''}${i.front?' (przy kabinie)':''}`)].join('\n')}
+$('copy').onclick=async()=>{const t=summary();try{await navigator.clipboard.writeText(t);$('saveMsg').innerHTML='<p class="msg info">Skopiowano opis planu.</p>'}catch(e){const b=$('copyBox');b.hidden=false;b.value=t;b.select();$('saveMsg').innerHTML='<p class="msg info">Zaznacz i skopiuj tekst poniżej.</p>'}};
+$('pdf').onclick=()=>{if(!result)return;$('orderCard').open=true;printing=true;showResult();try{window.print()}catch(e){$('saveMsg').innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}};
+$('png').onclick=()=>{if(!result)return;const r=result,o=r.opts[r.sel];const svg=drawPlan(r,o,false,true);const img=new Image();
+img.onload=()=>{const head=70;const c=document.createElement('canvas');c.width=img.width;c.height=img.height+head*2+20;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+x.fillStyle='#111';x.font='bold 30px system-ui,sans-serif';x.fillText('Zlecenie '+(r.ord||'—')+(r.due?' · termin '+new Date(r.due+'T00:00').toLocaleDateString('pl-PL'):'')+' – '+o.veh.name,24,46);x.font='22px system-ui,sans-serif';x.fillStyle='#555';
+x.fillText(`${o.lay.length} palet · ${fmt(r.kg)} kg · zajęte ${o.length} z ${o.veh.L} cm · ${o.ok?'mieści się':'NIE mieści się'}`,24,84);x.drawImage(img,0,head+30);x.font='16px system-ui,sans-serif';x.fillStyle='#888';x.fillText('Cargo Planner Pro [GDS]',24,c.height-20);
+c.toBlob(b=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(r.ord||$('planName').value||'plan-zaladunku').replace(/[^\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ -]/g,'')+'.png';document.body.appendChild(a);a.click();a.remove();$('saveMsg').innerHTML='<p class="msg info">Zapisano obraz PNG.</p>'}catch(e){$('saveMsg').innerHTML='<p class="msg err">Pobieranie plików nie działa w tym widoku.</p>'}},'image/png')};
+img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)};
+$('newPlan').onclick=()=>{$('ordNo').value='';$('ordDate').value='';result=null;currentPlanId=null;currentPlanName='';$('planName').value='';$('resBox').hidden=true;$('emptyRes').hidden=false;$('saveMsg').innerHTML='';msg('');setStep(1);$('secLoad').scrollIntoView({behavior:'smooth'})};
+
+/* ---------- SAVE / LOAD ---------- */
+async function savePlan(){if(!result)return;const sm=$('saveMsg');if(!db){sm.innerHTML='<p class="msg err">Zapis jest niedostępny.</p>';return}
+const name=($('planName').value.trim()||($('ordNo').value.trim()?'Zlecenie '+$('ordNo').value.trim():''));if(name&&!$('planName').value.trim())$('planName').value=name;if(!name){sm.innerHTML='<p class="msg err">Podaj nazwę planu.</p>';$('planName').focus();return}
+if(currentPlanId&&name!==currentPlanName)currentPlanId=null;const upd=!!currentPlanId;const r=result;const now=new Date().toISOString();
+const body={name,ord:r.ord||'',due:r.due||'',mode:r.mode,wMode:r.wMode||'each',totalKg:r.wMode==='total'?r.kg:0,sel:r.sel,kg:r.kg,gap:r.gap,o:r.o,items:r.items,opts:r.opts.map(x=>({veh:x.veh,length:x.length,Lmax:x.Lmax,fitL:x.fitL,fitP:x.fitP,ok:x.ok,useA:x.useA,useP:x.useP,status:x.status,lay:x.lay.map(p=>[p.x,p.y,p.l,p.w,p.g,p.kg,p.front?1:0])})),updatedAt:now,updatedBy:myId,updatedByName:myName};
+$('save').disabled=true;try{if(upd){body.createdAt=now;await db.collection(P('plans')).doc(currentPlanId).set(body)}else{body.createdAt=now;const ref=await db.collection(P('plans')).add(body);currentPlanId=ref.id}
+currentPlanName=name;sm.innerHTML=`<p class="msg info">${upd?'Zaktualizowano':'Zapisano nowy'} plan „${esc(name)}”. Aby zapisać kolejny, wpisz inną nazwę.</p>`}
+catch(e){sm.innerHTML=`<p class="msg err">${e&&e.code==='quota_exceeded'?'Baza jest pełna. Usuń stare plany.':'Nie udało się zapisać. Spróbuj ponownie.'}</p>`}finally{$('save').disabled=false}}
+$('save').onclick=savePlan;
+function loadPlan(x,id){if(!x||!x.opts){return}items=(x.items||[]).map(i=>({...i}));$('gap').value=x.gap||0;if(x.o){$('useKg').checked=x.o.useKg!==false;$('useRes').checked=!!x.o.useRes;$('res').value=x.o.res||10}
+wMode=x.wMode||'each';if(wMode==='total')$('totalKg').value=x.totalKg||x.kg||'';setWMode(wMode);setMode(x.mode||'pick');
+$('ordNo').value=x.ord||'';$('ordDate').value=x.due||'';result={ord:x.ord||'',due:x.due||'',mode:x.mode||'pick',wMode:x.wMode||'each',sel:x.sel||0,kg:x.kg||0,gap:x.gap||0,o:x.o||{useKg:true},items:items.map(i=>({...i})),at:x.updatedAt,opts:x.opts.map(o=>({...o,lay:(o.lay||[]).map(a=>({x:a[0],y:a[1],l:a[2],w:a[3],g:a[4],kg:a[5],front:!!a[6]}))}))};
+currentPlanId=id;currentPlanName=x.name||'';$('planName').value=x.name||'';$('saveMsg').innerHTML='';msg('');showResult();setStep(3);$('recCard').scrollIntoView({behavior:'smooth',block:'start'})}
+function renderSaved(){const box=$('savedList');$('savedHint').textContent=savedDocs.length+' zapisanych'+(multi&&curCo()?' · '+curCo().name:'');
+if(!savedDocs.length){box.innerHTML='<p class="muted" style="margin:0">Nie ma jeszcze zapisanych planów.</p>';return}
+box.innerHTML=savedDocs.map(d=>{const x=d.data()||{};const o=(x.opts||[])[x.sel||0]||{};const n=(x.items||[]).reduce((a,b)=>a+(+b.q||0),0);const dt=x.updatedAt?new Date(x.updatedAt).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'}):'';const who=String(x.updatedByName||'').split('@')[0];
+const due=x.due?new Date(x.due+'T00:00').toLocaleDateString('pl-PL'):'';return`<div class="it"><div class="t"><b>${esc(x.name)}</b><span>${x.ord?'zl. '+esc(x.ord)+' · ':''}${due?'termin '+esc(due)+' · ':''}${esc(o.veh&&o.veh.name)} · ${n} palet · ${dt}${who?' · '+esc(who):''}</span></div><button class="btn sm" data-open="${esc(d.id)}">Otwórz</button><button class="x" data-delplan="${esc(d.id)}" aria-label="Usuń plan">×</button></div>`}).join('')}
+function armDelete(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed='1';btn.textContent='Usuń?';btn.style.fontSize='13px';btn.style.color='var(--bad)';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent='×';btn.style.fontSize='';btn.style.color=''}},3000)}
+$('savedList').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){const d=savedDocs.find(x=>x.id===o.dataset.open);if(d)loadPlan(d.data(),d.id);return}
+const del=e.target.closest('[data-delplan]');if(del)armDelete(del,async()=>{try{await db.collection(P('plans')).doc(del.dataset.delplan).delete();if(currentPlanId===del.dataset.delplan){currentPlanId=null;currentPlanName=''}}catch(err){}})});
+
+const P=sub=>multi&&cid?`companies/${cid}/${sub}`:sub;
+const myMail=()=>String(myName||'').toLowerCase();
+const curCo=()=>companies.find(c=>c.id===cid);
+const isAdmin=()=>{const c=curCo();return!!c&&(c.admins||[]).includes(myMail())};
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function subscribeData(){subs.forEach(u=>{try{u()}catch(e){}});subs=[];savedDocs=[];fleet=[];renderSaved();renderVeh();
+if(multi&&!cid){$('savedHint').textContent='';return}
+const tm=setTimeout(()=>{$('savedHint').textContent='brak połączenia'},10000);
+subs.push(db.collection(P('plans')).orderBy('updatedAt','desc').limit(200).onSnapshot(s=>{clearTimeout(tm);savedDocs=s.docs;renderSaved()},()=>{clearTimeout(tm);$('savedHint').textContent='niedostępne'}));
+}
+function setCompany(id){if(id===cid)return;cid=id;lsSet('cp_company',id||'');currentPlanId=null;currentPlanName='';$('saveMsg').innerHTML='';renderCompanies();subscribeData()}
+function renderCompanies(){if(!multi)return;const has=companies.length>0;$('coBar').hidden=!has;$('coFirst').hidden=has;
+$('coSel').innerHTML=companies.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cid)$('coSel').value=cid;
+const c=curCo();if(!c){$('coBody').innerHTML='';return}const adm=isAdmin();
+$('coBody').innerHTML=`<p class="muted" style="margin:0 0 8px">Dostęp do firmy <b style="color:var(--tx)">${esc(c.name)}</b>. Osoby spoza listy nie widzą jej planów.</p>
+<div>${(c.members||[]).map(m=>`<div class="mem"><span>${esc(m)}</span>${(c.admins||[]).includes(m)?'<span class="tag">admin</span>':''}${adm&&m!==myMail()?`<button class="x" data-rmem="${esc(m)}" aria-label="Usuń dostęp">×</button>`:''}</div>`).join('')}</div>
+${adm?`<div class="row" style="margin-top:10px"><input type="email" id="memMail" placeholder="e-mail osoby" style="flex:1;min-width:160px"><label class="tog"><input type="checkbox" id="memAdm">admin</label><button class="btn sm" id="memAdd">Dodaj osobę</button></div>
+<p class="muted" style="margin:6px 0 0">Osoba musi mieć konto w aplikacji (zakładasz je w Firebase). Po dodaniu firma pojawi się u niej automatycznie.</p>`:'<p class="muted" style="margin:8px 0 0">Członków dodaje administrator firmy.</p>'}
+<div style="border-top:1px solid var(--bd);margin-top:12px;padding-top:12px"><label class="lbl">Nowa firma</label><div class="row"><input type="text" id="coNew" placeholder="nazwa firmy" style="flex:1"><button class="btn sm" id="coCreate">Utwórz firmę</button></div></div>
+<p class="muted" id="coMsg" style="margin:6px 0 0"></p>`}
+async function createCompany(name,msgEl){name=name.trim();if(!name){msgEl.textContent='Podaj nazwę firmy.';return}
+try{const ref=await db.collection('companies').add({name,members:[myMail()],admins:[myMail()],createdAt:new Date().toISOString()});lsSet('cp_company',ref.id);cid=null;setTimeout(()=>{if(companies.some(c=>c.id===ref.id))setCompany(ref.id)},600);msgEl.textContent='Utworzono firmę „'+name+'”.'}catch(e){msgEl.textContent='Nie udało się utworzyć firmy.'}}
+async function updateMembers(fn){const c=curCo();if(!c)return;const members=[...(c.members||[])],admins=[...(c.admins||[])];fn(members,admins);
+try{await db.collection('companies').doc(c.id).set({name:c.name,members,admins,createdAt:c.createdAt||''})}catch(e){const m=$('coMsg');if(m)m.textContent='Nie udało się zapisać zmian.'}}
+$('coSel').onchange=e=>setCompany(e.target.value);
+$('coBtn').onclick=()=>{const c=$('coCard');c.hidden=!c.hidden;c.open=!c.hidden};
+$('coCreateFirst').onclick=()=>createCompany($('coNewFirst').value,$('coFirstMsg'));
+$('coBody').addEventListener('click',e=>{if(e.target.id==='coCreate'){createCompany($('coNew').value,$('coMsg'));return}
+if(e.target.id==='memAdd'){const m=$('memMail').value.trim().toLowerCase(),adm=$('memAdm').checked;if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){$('coMsg').textContent='Podaj poprawny e-mail.';return}
+updateMembers((mem,ad)=>{if(!mem.includes(m))mem.push(m);if(adm&&!ad.includes(m))ad.push(m)});return}
+const r=e.target.closest('[data-rmem]');if(r)armDelete(r,()=>updateMembers((mem,ad)=>{const m=r.dataset.rmem;mem.splice(mem.indexOf(m),1);const i=ad.indexOf(m);if(i>=0)ad.splice(i,1)}))});
+window.startDb=function(adb,me){db=adb;myId=me.uid||'';myName=me.email||'';multi=!!me.multi;if(myName)$('who').textContent=myName;
+if(!multi){subscribeData();return}
+db.collection('companies').where('members','array-contains',myMail()).onSnapshot(s=>{companies=s.docs.map(d=>({id:d.id,...(d.data()||{})})).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));
+let want=cid&&companies.some(c=>c.id===cid)?cid:null;if(!want){const last=lsGet('cp_company');want=companies.some(c=>c.id===last)?last:(companies[0]&&companies[0].id)||null}
+if(want!==cid){cid=want;currentPlanId=null;currentPlanName='';subscribeData()}renderCompanies()},()=>{$('savedHint').textContent='niedostępne'})};
+window.noDb=function(t){$('savedHint').textContent='niedostępne';$('savedList').innerHTML=`<p class="muted" style="margin:0">${t}</p>`};
+
+renderItems();renderVeh();setMode('pick');setStep(1);
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,setDoc,addDoc,deleteDoc,onSnapshot,query,orderBy,limit,where} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {firebaseConfig} from "./firebase-config.js";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),fs=getFirestore(app);
+const wrap=s=>({id:s.id,exists:s.exists(),data:()=>s.data()});
+const dref=(p,id)=>{const r=doc(fs,p,id);return{id:r.id,get:async()=>wrap(await getDoc(r)),set:d=>setDoc(r,d),delete:()=>deleteDoc(r)}};
+const coll=(p,c=[])=>({where:(f,op,v)=>coll(p,[...c,where(f,op,v)]),doc:id=>dref(p,id||doc(collection(fs,p)).id),add:async d=>({id:(await addDoc(collection(fs,p),d)).id}),orderBy:(f,dir)=>coll(p,[...c,orderBy(f,dir)]),limit:n=>coll(p,[...c,limit(n)]),onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),...c),s=>n({docs:s.docs.map(wrap),metadata:s.metadata}),x=>e&&e(x))});
+const $=id=>document.getElementById(id);let started=false;
+onAuthStateChanged(auth,u=>{if(u){$('login').style.display='none';$('logout').hidden=false;if(!started){started=true;window.startDb({collection:p=>coll(p)},{uid:u.uid,email:u.email,multi:true})}}else{$('login').style.display='flex';if(started)location.reload()}});
+$('lf').onsubmit=async e=>{e.preventDefault();$('lmsg').textContent='';$('lb').disabled=true;try{await signInWithEmailAndPassword(auth,$('le').value.trim(),$('lp').value)}catch(err){$('lmsg').textContent='Nieprawidłowy e-mail lub hasło.'}finally{$('lb').disabled=false}};
+$('lr').onclick=async()=>{const m=$('le').value.trim();if(!m){$('lmsg').textContent='Wpisz najpierw e-mail.';return}try{await sendPasswordResetEmail(auth,m);$('lmsg').textContent='Wysłaliśmy link do zmiany hasła.'}catch(e){$('lmsg').textContent='Nie udało się wysłać linku.'}};
+$('logout').onclick=()=>signOut(auth);
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+(()=>{const b=document.getElementById('install'),h=document.getElementById('installHelp');let ev=null;
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;if(standalone)return;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;b.hidden=false});
+if(ios)b.hidden=false;
+b.onclick=async()=>{if(ev){ev.prompt();const r=await ev.userChoice;if(r.outcome==='accepted')b.hidden=true;ev=null}else{h.hidden=!h.hidden}};
+addEventListener('appinstalled',()=>{b.hidden=true;h.hidden=true});})();</script>
+</body>
+</html>

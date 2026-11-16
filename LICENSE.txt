@@ -1,0 +1,6 @@
+Cargo Planner Pro [GDS]
+Copyright (c) 2026 Łukasz Grudka – Grudka Digital System (GDS).
+Wszelkie prawa zastrzeżone. All rights reserved.
+
+Kopiowanie, rozpowszechnianie i modyfikowanie tego oprogramowania
+bez pisemnej zgody autora jest zabronione.

@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.email != null; }
+    function me() { return request.auth.token.email.lower(); }
+    function company(cid) { return get(/databases/$(database)/documents/companies/$(cid)).data; }
+
+    // Firma: widzą ją tylko jej członkowie, zmienia administrator
+    match /companies/{cid} {
+      allow read: if signedIn() && me() in resource.data.members;
+      allow create: if signedIn()
+        && me() in request.resource.data.admins
+        && me() in request.resource.data.members;
+      allow update: if signedIn() && me() in resource.data.admins
+        && me() in request.resource.data.admins;
+      allow delete: if signedIn() && me() in resource.data.admins;
+
+      // Plany firmy: tylko członkowie tej firmy
+      match /{coll}/{docId} {
+        allow read, write: if signedIn()
+          && coll == 'plans'
+          && me() in company(cid).members;
+      }
+    }
+  }
+}
