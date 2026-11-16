@@ -4,5 +4,9 @@
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./public"
-  }
+  },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "cargo.grudka-studio.dev", "custom_domain": true }
+  ]
 }
