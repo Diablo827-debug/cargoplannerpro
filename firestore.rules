@@ -30,7 +30,6 @@ service cloud.firestore {
       allow read: if signedIn() && (me() in resource.data.members || isSuper());
       allow create, update, delete: if isSuper();
 
-      // Plany firmy: wyłącznie członkowie tej firmy (także administrator musi być członkiem)
       // Plany firmy (Cargo: plans, Pallet Planner: stacks): wyłącznie członkowie tej firmy
       match /{coll}/{pid} {
         allow read, write: if signedIn()

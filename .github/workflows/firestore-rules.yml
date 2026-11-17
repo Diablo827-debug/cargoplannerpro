@@ -1,0 +1,31 @@
+# Automatyczne wgrywanie reguł bazy (firestore.rules) do Firebase po każdej zmianie w repozytorium.
+# Wymaga sekretu FIREBASE_SERVICE_ACCOUNT (klucz konta usługi z Firebase, plik JSON).
+name: Reguły Firestore
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - firestore.rules
+      - firebase.json
+      - .github/workflows/firestore-rules.yml
+  workflow_dispatch:
+
+jobs:
+  deploy-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Klucz konta usługi
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SA" ]; then echo "Brak sekretu FIREBASE_SERVICE_ACCOUNT"; exit 1; fi
+          printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+      - name: Wgraj reguły
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
+        run: npx -y firebase-tools@latest deploy --only firestore:rules --project cargoplannerpro --non-interactive
