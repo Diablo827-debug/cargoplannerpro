@@ -121,6 +121,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .colL,.steps,.noprint,#login,.top .user{display:none!important}
 .grid{display:block}.card,.rec{break-inside:avoid;border-color:#bbb;margin-bottom:10px}
 .printonly{display:block}
+body{font-size:15px}.order{font-size:16px!important}.order div{padding:4px 0!important}.order .nb{width:26px!important;height:26px!important;font-size:14px!important}.card h2,.card summary,details>summary{font-size:19px!important}.kpi span,.stats span{font-size:14px!important}.kpi b,.stats b{font-size:22px!important}svg text{font-size:120%}
 }
 @media(max-width:600px){
 .top h1{font-size:20px}.top p{display:none}.top .user span{display:none}
@@ -139,6 +140,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .gds{display:inline-block;vertical-align:middle;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--or2);border:1.5px solid var(--or);border-radius:6px;padding:1px 6px;margin-left:4px;position:relative;top:-2px}
 .foot{text-align:center;color:var(--tx3);font-size:12px;padding:22px 10px 6px;line-height:1.6}.foot b{color:var(--tx2);font-weight:600}
 @media print{.foot{color:#555;padding:10px 0 0;font-size:10px}.gds{color:#c56a00;border-color:#c56a00}}
+.appsw{display:flex;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:5px;margin:0 0 12px}.appsw a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 10px;border-radius:10px;color:var(--tx2);text-decoration:none;font-weight:700;font-size:15px}.appsw a.on{background:var(--orbg);color:var(--or2);box-shadow:inset 0 0 0 1.5px var(--or)}.appsw svg{width:20px;height:20px;flex:none}@media print{.appsw{display:none!important}}
 </style>
 <style>
 .drop{border:1.5px dashed var(--tx3);border-radius:12px;padding:14px;text-align:center;color:var(--tx2);cursor:pointer;margin-bottom:12px;font-size:14px}
@@ -163,7 +165,12 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 @media print{#resBox,.colR,#secRes{display:block!important}#resBox>*{margin-bottom:3mm}details.card>summary:after{display:none!important}.view3d,.ptabs,.rec{display:none!important}#printImg{display:block;max-height:100mm;width:auto!important;max-width:100%;margin:4mm auto!important;object-fit:contain}
 #viewCard,#lvCard,#orderCard{break-inside:auto!important;padding:4px 0!important;border:none!important}
 #levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm}.lv{border:none!important;padding:0!important;break-inside:avoid}.lv summary{font-size:10px;list-style:none}.lv summary::-webkit-details-marker{display:none}.lv svg{max-width:100%!important;margin:1mm 0 0!important}
-#lvCard>summary,#orderCard>summary{font-size:13px}.order{font-size:10.5px}.order div{padding:1px 0!important}.order .nb{width:18px;height:18px;font-size:10px}}
+#lvCard>summary,#orderCard>summary{font-size:13px}.order{font-size:10.5px}.order div{padding:1px 0!important}.order .nb{width:18px;height:18px;font-size:10px}
+body{font-size:15px}#levels{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5mm}.lv summary{font-size:14px!important}#lvCard>summary,#orderCard>summary,#sawCard>summary,.card h2{font-size:19px!important}.order{font-size:15px!important}.order div{padding:3px 0!important}.order .nb{width:26px!important;height:26px!important;font-size:14px!important}.kpi span{font-size:14px!important}.kpi b{font-size:22px!important}.saw,.saw td,.saw th,#sawCard table{font-size:14px!important}}
+.appsw{display:flex;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:5px;margin:0 0 12px}.appsw a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 10px;border-radius:10px;color:var(--tx2);text-decoration:none;font-weight:700;font-size:15px}.appsw a.on{background:var(--orbg);color:var(--or2);box-shadow:inset 0 0 0 1.5px var(--or)}.appsw svg{width:20px;height:20px;flex:none}@media print{.appsw{display:none!important}}
+.bat{margin:10px 0 4px}.bat>summary{font-weight:700;font-size:16px;cursor:pointer;padding:6px 0}.bat>summary small{color:var(--tx3);font-weight:600;margin-left:6px}.brow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin:6px 0 0;color:var(--tx);font-size:15px}.brow.on{border-color:var(--or);background:var(--orbg)}.brow small{color:var(--tx2);font-size:13px}.bst{text-align:right}.bst.ok{color:var(--ok)!important}.bst.warn{color:var(--warn)!important}.bst.bad{color:var(--bad)!important}
+#bPrint{display:none}.bline{display:flex;align-items:center;gap:8px}.bline input,.ball input{width:22px;height:22px;flex:none;accent-color:var(--or)}.ball{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx2);margin:4px 0 2px}
+@media print{body.bprint>*:not(#bPrint){display:none!important}body.bprint #bPrint{display:block!important}body.bprint #bPrint #resBox{display:block!important}.bpage{break-after:page}.bpage:last-child{break-after:auto}}
 </style>
 </head>
 <body>
@@ -181,6 +188,7 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 <div><h1>Pallet Planner <em>Pro</em> <span class="gds">GDS</span></h1><p>Pakowanie mebli na palety · 3D · warstwy · masa</p></div>
 <div class="user"><button class="btn sm or" id="install" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Zainstaluj</button><span id="who"></span><button class="iconbtn" id="logout" title="Wyloguj" aria-label="Wyloguj" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
 </header>
+<nav class="appsw" aria-label="Aplikacje"><a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 6h12v10H2zM14 9h4l3 4v3h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Auta</a><a href="/paleta/" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18h18M5 18v2M12 18v2M19 18v2"/><rect x="4" y="11" width="7" height="7"/><rect x="13" y="11" width="7" height="7"/><rect x="8" y="4" width="8" height="7"/></svg>Palety</a></nav>
 <p class="msg info" id="installHelp" hidden style="margin:0 0 12px">Na iPhonie/iPadzie: otwórz w Safari, stuknij <b>Udostępnij</b> → <b>Do ekranu początkowego</b>. Na komputerze: w Chrome lub Edge kliknij ikonę instalacji po prawej stronie paska adresu.</p>
 <div class="cobar" id="coBar" hidden>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f7931e" stroke-width="2"><path d="M3 21V7l7-4v18M10 21h11V10l-11-3M14 13h3M14 17h3M6 10h1M6 14h1"/></svg>
@@ -260,8 +268,9 @@ body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 <section class="card" id="secLoad">
 <h2><span class="num">2.</span> Meble do spakowania <small id="itHint"></small></h2>
 <div class="wseg" id="mSeg"><button data-m="mixed" class="on">Meble / elementy</button><button data-m="uni">Jednakowe kartony</button></div>
-<div class="drop" id="drop" tabindex="0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-5px"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg> <b>Wrzuć plik zamówienia (Excel)</b><br><span style="font-size:12px">albo kliknij, aby wybrać · .xls, .xlsx, .csv</span><input type="file" id="file" accept=".xlsx,.xlsm,.xls,.csv" hidden></div>
+<div class="drop" id="drop" tabindex="0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-5px"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg> <b>Wrzuć plik zamówienia (Excel) – możesz kilka naraz</b><br><span style="font-size:12px">albo kliknij, aby wybrać · .xls, .xlsx, .csv</span><input type="file" id="file" accept=".xlsx,.xlsm,.xls,.csv" multiple hidden></div>
 <div id="impMsg"></div>
+<div id="batchBox"></div>
 <div id="items"></div>
 <button class="add" id="addItem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Dodaj element</button>
 <p class="muted" id="uniInfo" hidden style="margin:10px 0 0">Zostaw ilość pustą, a program policzy, ile kartonów zmieści się na jednej palecie.</p>
@@ -686,31 +695,75 @@ row.forEach((c,i)=>{for(const k in HDR)if(m[k]===undefined&&HDR[k].test(c)){m[k]
 let A,B;if(m.wid!==undefined&&m.dep!==undefined){A='wid';B='dep'}else if(m.len!==undefined&&m.wid!==undefined){A='len';B='wid'}else if(m.len!==undefined&&m.dep!==undefined){A='len';B='dep'}
 if(!A||m.hei===undefined)continue;
 const out=[];for(let j=r+1;j<sh.rows.length;j++){const x=sh.rows[j]||[];const num=k=>m[k]===undefined?NaN:parseFloat(String(x[m[k]]??'').replace(',','.'));
-const l=num(A),w=num(B),h=num('hei');if(!(l>0&&w>0&&h>0))continue;
-const nm=[m.sym!==undefined?String(x[m.sym]??'').trim():'',m.n!==undefined?String(x[m.n]??'').trim().split(/\r?\n/)[0].slice(0,40):''].filter(Boolean).filter((v,i,a)=>!(i&&a[0]&&a[0].includes(v))).join(' – ');
-const prev=out[out.length-1];
-if(!nm&&prev&&prev.desk){out.push({n:(prev.base||prev.n)+' – komoda',t:'solid',l,w,h,kg:num('kg')>0?num('kg'):'',q:num('q')>0?Math.round(num('q')):prev.q,fragile:false,side:false,note:''});continue}
-const biurko=/biurk|magnus/i.test(nm),qq=num('q')>0?Math.round(num('q')):1;
-if(biurko&&h>5){const T=1.8,tb=num('tb'),TB=tb>5&&tb<=60?tb/10:tb>0&&tb<=6?tb:T,nt='Formatki wyliczone z wymiarów biurka (blat, 2 boki, blenda) – sprawdź i popraw w razie potrzeby.',base=nm.replace(/\s+$/,''),F=(n,a,b,k,last,th)=>out.push({desk:!!last,fixT:1,base,n:base+' – '+n,t:'flat',l:Math.max(a,b),w:Math.min(a,b),h:th||T,kg:'',q:qq*k,fragile:false,side:false,note:last?'':nt});
-F('blat',l,w,1,false,TB);F('bok',w,Math.max(1,h-TB),2);F('blenda',Math.max(1,l-2*T),30,1,true);continue}
-out.push({n:nm,t:h<=5?'flat':'solid',l,w,h,kg:num('kg')>0?num('kg'):'',q:qq,fragile:false,side:false,note:''})}
+const parts=k=>m[k]===undefined?[]:String(x[m[k]]??'').replace(/,/g,'.').split(/\s*[x×*]\s*/i).map(parseFloat).filter(v=>!isNaN(v));
+const [l,l2]=parts(A),[w,w2]=parts(B),[h,h2]=parts('hei');if(!(l>0&&w>0&&h>=0))continue;
+const symR=m.sym!==undefined?String(x[m.sym]??'').trim():'',SL=symR.split(/\r?\n|\s+\/\s+/).map(v=>v.trim()).filter(Boolean),code=SL[0]||'',pname=SL.slice(1).join(' ')||(/\s/.test(code)?code:''),op=m.n!==undefined?(String(x[m.n]??'').split(/\r?\n/).map(v=>v.trim()).find(Boolean)||'').replace(/\s+/g,' '):'',sym=symR.replace(/\s+/g,' ');
+if(!h&&!/blat|board|p[łl]yt/i.test(sym+' '+op))continue;
+const nm=(pname||op||code).replace(/\s+-\s+P048\w*$/,'').slice(0,42).trim();
+const qq=num('q')>0?Math.round(num('q')):1,kg=num('kg')>0?num('kg'):'';const prev=out[out.length-1];
+const tb=num('tb'),T=tb>5&&tb<=60?tb/10:tb>0&&tb<=6?tb:1.8;
+const it=(o)=>out.push({kg:'',q:qq,fragile:false,side:false,note:'',...o});
+if(!nm&&prev&&prev.desk){it({n:(prev.base||prev.n)+' – komoda',t:'solid',l,w,h,kg,q:num('q')>0?qq:prev.q});continue}
+const txt=sym+' '+op,solidT=/_(KR|KD|SB|SU|NW|RG|SZ)_|kontener|komod|szaf|nadstawk|rega[łl]|cabinet|chest|sideboard/i,deskT=/_(BI|SK|SO|LR|ST)_|biurk|desk|st[óo][łl]|stolik|table|lada|recep/i;
+if(!h){it({n:nm,t:'flat',l:Math.max(l,w),w:Math.min(l,w),h:T,kg,fixT:1});continue}
+if(deskT.test(txt)&&!/_(KR|KD|SB|SU|NW|RG|SZ)_/i.test(code)&&!/^(kontener|komod|szaf|nadstawk|cabinet|chest)/i.test(pname||op)){
+ const LT=T>3.6?1.8:T,nt='Formatki wyliczone z wymiarów (blat, 2 boki, blenda) – sprawdź i popraw w razie potrzeby.',base=nm,
+ F=(n,a,b,k,th,last)=>it({desk:!!last,fixT:1,base,n:base+' – '+n,t:'flat',l:r1(Math.max(a,b)),w:r1(Math.min(a,b)),h:th,q:qq*k,note:n==='blat'?nt:''});
+ const hb=Math.min(!(l2>0)&&h2>0&&h2<h?h2:36,Math.max(5,h-T-2));
+ F('blat',l,w,1,T);F('bok',w-0.4,Math.max(1,h-T),2,LT);F('blenda',Math.max(5,l-2*LT-1),hb,1,1.8,!(l2>0));
+ if(l2>0){const d2=w2>0?w2:Math.max(30,w-10),hh=h2>0&&h2<h?h2:Math.max(5,h-T);it({desk:true,base,n:base+' – '+(w2>0||h2>0?'komoda':'kontener'),t:'solid',l:l2,w:d2,h:hh,fixT:1})}
+ continue}
+it({n:nm,t:h<=5?'flat':'solid',l,w,h,kg});if(l2>0&&w2>0&&h2>0)it({n:nm+' – moduł 2',t:'solid',l:l2,w:w2,h:h2})}
 if(out.length)return{sheet:sh.name,rows:out,meta:sheetMeta(sh)}}return null}
 function loadSheetJS(){return new Promise((res,rej)=>{if(window.XLSX)return res(window.XLSX);const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>res(window.XLSX);s.onerror=()=>rej(new Error('Brak biblioteki .xls'));document.head.appendChild(s)})}
 async function readXls(buf){const X=await loadSheetJS();const wb=X.read(new Uint8Array(buf),{type:'array'});return wb.SheetNames.map(n=>({name:n,rows:X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''})}))}
-async function importFile(f){const box=$('impMsg');box.innerHTML='<p class="msg info">Wczytuję plik…</p>';
-try{let sheets;if(/\.csv$/i.test(f.name))sheets=readCsv(await f.text());else if(/\.xls$/i.test(f.name))sheets=await readXls(await f.arrayBuffer());else{const buf=await f.arrayBuffer();try{sheets=await readXlsx(buf)}catch(e){sheets=await readXls(buf)}}
+async function parseFile(f){let sheets;if(/\.csv$/i.test(f.name))sheets=readCsv(await f.text());else if(/\.xls$/i.test(f.name))sheets=await readXls(await f.arrayBuffer());else{const buf=await f.arrayBuffer();try{sheets=await readXlsx(buf)}catch(e){sheets=await readXls(buf)}}
 const pr=n=>/^zam/i.test(n)?3:/pacz|pack/i.test(n)?2:/rozkr|optym/i.test(n)?0:1;const ranked=[...sheets].sort((a,b)=>pr(b.name)-pr(a.name));let got=null;for(const sh of ranked){got=mapSheet(sh);if(got&&got.rows.length)break}
-if(!got||!got.rows.length){box.innerHTML='<p class="msg err">Nie znalazłem w pliku kolumn z wymiarami (długość, szerokość, wysokość). Podeślij przykładowy plik – dopasuję import do Waszego formatu.</p>';return}
+if(!got||!got.rows.length)return null;
 const dims=got.rows.flatMap(r=>[r.l,r.w,r.h]).sort((a,b)=>a-b);const med=dims[Math.floor(dims.length/2)];const mm=med>300;
-const conv=got.rows.map(r=>mm?{...r,l:r1(r.l/10),w:r1(r.w/10),h:r.fixT?r.h:r1(r.h/10)}:r);
-setMode('mixed');items=conv;renderItems();setStep(2);const mt=got.meta||{};if(mt.ord&&!$('ordNo').value)$('ordNo').value=mt.ord;if(mt.due&&!$('ordDate').value)$('ordDate').value=mt.due;
-const noKg=0;const nBiu=conv.filter(r=>r.note&&/blat$/.test(r.n)).length;box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${conv.length}</b> pozycji z arkusza „${esc(got.sheet)}”${mm?' (wymiary przeliczone z mm na cm)':''}${(got.meta||{}).ord?' · zamówienie '+esc(got.meta.ord):''}${(got.meta||{}).due?' · termin '+esc(got.meta.due):''}.${nBiu?` <b style="color:var(--warn)">Biurka (${nBiu}) rozłożone na formatki</b> (blat, 2 boki, blenda) – sprawdź wymiary.`:''} Masa brył jest szacowana z płyty (możesz wpisać dokładną).</p>`}
+const conv=got.rows.map(r=>mm?{...r,l:r1(r.l/10),w:r1(r.w/10),h:r.fixT?r.h:r1(r.h/10)}:r);const mt=got.meta||{};if(!mt.ord){const fm=f.name.match(/(\d{3,})[_ -]*MEBWAY[_ -]*(\d+)/i);mt.ord=fm?'MEBWAY '+fm[2]+' / '+fm[1]:f.name.replace(/\.[^.]+$/,'')}
+return{items:conv,meta:mt,sheet:got.sheet,mm,file:f.name}}
+async function importFile(f){const box=$('impMsg');box.innerHTML='<p class="msg info">Wczytuję plik…</p>';$('batchBox').innerHTML='';batch=[];
+try{const g=await parseFile(f);if(!g){box.innerHTML='<p class="msg err">Nie znalazłem w pliku kolumn z wymiarami (długość, szerokość, wysokość). Podeślij przykładowy plik – dopasuję import do Waszego formatu.</p>';return}
+const conv=g.items,mm=g.mm,got={sheet:g.sheet,meta:g.meta},mt=g.meta;setMode('mixed');items=conv;renderItems();setStep(2);$('ordNo').value='';$('ordDate').value='';if(mt.ord&&!$('ordNo').value)$('ordNo').value=mt.ord;if(mt.due&&!$('ordDate').value)$('ordDate').value=mt.due;
+const noKg=0;const nBiu=conv.filter(r=>/– blat$/.test(r.n)).length;box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${conv.length}</b> pozycji z arkusza „${esc(got.sheet)}”${mm?' (wymiary przeliczone z mm na cm)':''}${(got.meta||{}).ord?' · zamówienie '+esc(got.meta.ord):''}${(got.meta||{}).due?' · termin '+esc(got.meta.due):''}.${nBiu?` <b style="color:var(--warn)">Biurka/stoły (${nBiu}) rozłożone na formatki</b> (blat, 2 boki, blenda) – sprawdź wymiary.`:''} Masa brył jest szacowana z płyty (możesz wpisać dokładną).</p>`}
 catch(e){console.error(e);box.innerHTML='<p class="msg err">Nie udało się odczytać pliku. Zapisz go jako .xlsx albo .csv i spróbuj ponownie.</p>'}}
 $('drop').onclick=()=>$('file').click();$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};
-$('file').onchange=e=>{const f=e.target.files[0];if(f)importFile(f);e.target.value=''};
+$('file').onchange=e=>{const fs=[...e.target.files];if(fs.length>1)importMany(fs);else if(fs[0])importFile(fs[0]);e.target.value=''};
 ['dragenter','dragover'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.add('on')}));
 ['dragleave','drop'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.remove('on')}));
-$('drop').addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)importFile(f)});
+$('drop').addEventListener('drop',e=>{const fs=[...e.dataTransfer.files];if(fs.length>1)importMany(fs);else if(fs[0])importFile(fs[0])});
+/* ---------- WIELE ZAMÓWIEŃ ---------- */
+let batch=[],quiet=false;
+async function importMany(fs){const box=$('impMsg');box.innerHTML=`<p class="msg info">Wczytuję ${fs.length} plików…</p>`;batch=[];const bad=[];
+for(const f of fs){try{const g=await parseFile(f);if(g)batch.push({ord:g.meta.ord||g.file,due:g.meta.due||'',items:g.items,file:g.file,st:'',sel:true});else bad.push(f.name)}catch(e){console.error(e);bad.push(f.name)}}
+batch.sort((a,b)=>String(a.ord).localeCompare(String(b.ord),'pl',{numeric:true}));
+box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${batch.length}</b> zamówień.${bad.length?` <b style="color:var(--bad)">Nie odczytano: ${bad.map(esc).join(', ')}</b>.`:''} Kliknij zamówienie, aby je obejrzeć, albo policz i zapisz wszystkie naraz.</p>`;
+if(batch.length)openBatch(0);renderBatch()}
+function renderBatch(){const el=$('batchBox');if(!batch.length){el.innerHTML='';return}
+el.innerHTML=`<details class="bat" open><summary>Zamówienia z plików <small>${batch.length}</small></summary>
+<label class="ball"><input type="checkbox" id="bAll"${batch.every(b=>b.sel)?' checked':''}> Zaznacz wszystkie</label>
+${batch.map((b,i)=>`<div class="bline"><input type="checkbox" class="bsel" data-i="${i}"${b.sel?' checked':''} aria-label="Zaznacz ${esc(b.ord)}"><button class="brow${b.on?' on':''}" data-i="${i}"><span><b>${esc(b.ord)}</b>${b.due?' · '+esc(b.due):''}<br><small>${b.items.length} poz.</small></span><small class="bst ${b.cls||''}">${b.st||''}</small></button></div>`).join('')}
+<button class="btn or" id="batchGo" style="width:100%;margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>Policz i zapisz wszystkie (${batch.length})</button>
+<button class="btn" id="batchPrint" style="width:100%;margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>Drukuj zaznaczone (${batch.filter(b=>b.sel).length})</button></details>`;
+el.querySelectorAll('.bsel').forEach(x=>x.onchange=()=>{batch[+x.dataset.i].sel=x.checked;renderBatch()});$('bAll').onchange=e=>{batch.forEach(b=>b.sel=e.target.checked);renderBatch()};$('batchPrint').onclick=printBatch;
+el.querySelectorAll('.brow').forEach(x=>x.onclick=()=>{openBatch(+x.dataset.i);renderBatch()});$('batchGo').onclick=runBatch}
+function openBatch(i){batch.forEach((b,k)=>b.on=k===i);const b=batch[i];setMode('mixed');items=b.items.map(x=>({...x}));renderItems();$('ordNo').value=b.ord;$('ordDate').value=b.due;$('planName').value='';currentPlanId=null;currentPlanName='';setStep(2)}
+async function printBatch(){const sel=batch.filter(b=>b.sel);const sm=$('saveMsg');if(!sel.length){sm.innerHTML='<p class="msg err">Zaznacz zamówienia do druku.</p>';return}if(running)return;
+const keep={result,curPal,on:batch.findIndex(b=>b.on)};const out=$('bPrint');out.innerHTML='';
+for(const b of sel){const i=batch.indexOf(b);if(!b.res){openBatch(i);result=null;quiet=true;try{await calculate()}finally{quiet=false}b.res=result;if(!result)continue}
+openBatch(i);result=b.res;for(let p=0;p<result.pallets.length;p++){curPal=p;showResult();$('orderCard').open=true;if(result.custom)$('sawCard').open=true;$('lvCard').open=true;document.querySelectorAll('#levels details').forEach(d=>d.open=true);
+$('printImg').src=snapshot().toDataURL('image/png');const pg=document.createElement('div');pg.className='bpage';pg.innerHTML=$('resBox').outerHTML;out.appendChild(pg)}}
+renderBatch();if(keep.on>=0)openBatch(keep.on);result=keep.result;curPal=keep.curPal;if(result)showResult();
+document.body.classList.add('bprint');const done=()=>{document.body.classList.remove('bprint');out.innerHTML='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);
+setTimeout(()=>{try{window.print()}catch(e){done();sm.innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}},250)}
+async function runBatch(){if(running)return;const go=$('batchGo');go.disabled=true;let ok=0,err=0;const canSave=!!db&&!(multi&&!cid);
+for(let i=0;i<batch.length;i++){const b=batch[i];b.st='liczę…';b.cls='';openBatch(i);renderBatch();$('batchGo').disabled=true;
+result=null;quiet=true;try{await calculate()}finally{quiet=false}b.res=result;if(!result){b.st='✗ nie da się ułożyć';b.cls='bad';err++;continue}
+const r=result,np=r.pallets.length;b.st=`${np} pal.`+(r.custom?' · '+r.pallets.map(p=>p.L+'×'+p.W).join(', '):'')+(r.unplaceable.length?' · ✗ '+r.unplaceable.length+' nie mieści się':'');b.cls=r.unplaceable.length?'warn':'ok';
+if(canSave){$('planName').value='Zlecenie '+b.ord;await savePlan();if(currentPlanId){b.st+=' · zapisano';ok++}else{b.st+=' · błąd zapisu';b.cls='bad';err++}}else ok++}
+renderBatch();$('saveMsg').innerHTML=`<p class="msg ${err?'err':'info'}">${canSave?`Zapisano ${ok} z ${batch.length} planów.`:`Policzono ${ok} z ${batch.length} zamówień – zapis niedostępny (zaloguj się i dołącz do firmy).`}</p>`;
+if(window.innerWidth<1000)$('batchBox').scrollIntoView({behavior:'smooth',block:'start'})}
 
 /* ---------- LICZENIE ---------- */
 function msg(html,cls='err'){$('msgs').innerHTML=html?`<p class="msg ${cls}">${html}</p>`:''}
@@ -739,7 +792,7 @@ result={mode,custom,cfg:custom?C:null,P:custom?null:P,st:res.st||'',alt:res.alt|
 pallets:res.pallets.map(p=>custom?{kg:p.kg,L:p.L,W:p.W,tot:p.tot,palKg:p.palKg,packKg:p.packKg,gross:p.gross,deck:p.deck,cut:p.cut,placed:p.placed.map(mapB)}:{kg:p.kg,placed:p.placed.map(mapB)}),
 unplaceable:(res.unplaceable||[]).map(b=>({n:b.n,l:b.l,w:b.w,h:b.h,c:b.cnt||1})),pattern:res.pattern||null,ord:$('ordNo').value.trim(),due:$('ordDate').value,at:new Date().toISOString()};
 if(!result.pallets.length){msg(result.unplaceable.length?'Żadna pozycja nie mieści się na palecie (za duża, za wysoka albo za ciężka).':'Nie udało się ułożyć.');return}
-curPal=0;currentPlanId=null;currentPlanName='';showResult();setStep(3);if(window.innerWidth<1000)$('secRes').scrollIntoView({behavior:'smooth',block:'start'})}
+curPal=0;currentPlanId=null;currentPlanName='';showResult();setStep(3);if(window.innerWidth<1000&&!quiet)$('secRes').scrollIntoView({behavior:'smooth',block:'start'})}
 finally{running=false;$('go').disabled=false;$('goTxt').textContent=lbl;$('prog').hidden=true}}
 function palP(r,i){if(!r.custom)return r.P;const p=r.pallets[i]||r.pallets[0],c=r.cfg;return{L:p.L,W:p.W,H:c.maxH-c.palH,ph:c.palH,over:0,pkg:p.palKg+p.packKg,maxH:c.maxH,maxKgT:c.maxKg}}
 const POSE={up:'w pionie',side:'na boku',flat:'na płasko'};
@@ -964,5 +1017,6 @@ if(ios)b.hidden=false;
 b.onclick=async()=>{if(ev){ev.prompt();const r=await ev.userChoice;if(r.outcome==='accepted')b.hidden=true;ev=null}else{h.hidden=!h.hidden}};
 addEventListener('appinstalled',()=>{b.hidden=true;h.hidden=true});})();</script>
 
+<div id="bPrint"></div>
 </body>
 </html>
