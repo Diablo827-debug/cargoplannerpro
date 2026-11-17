@@ -171,6 +171,12 @@ body{font-size:15px}#levels{grid-template-columns:repeat(2,minmax(0,1fr))!import
 .bat{margin:10px 0 4px}.bat>summary{font-weight:700;font-size:16px;cursor:pointer;padding:6px 0}.bat>summary small{color:var(--tx3);font-weight:600;margin-left:6px}.brow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--bd);border-radius:10px;padding:9px 11px;margin:6px 0 0;color:var(--tx);font-size:15px}.brow.on{border-color:var(--or);background:var(--orbg)}.brow small{color:var(--tx2);font-size:13px}.bst{text-align:right}.bst.ok{color:var(--ok)!important}.bst.warn{color:var(--warn)!important}.bst.bad{color:var(--bad)!important}
 #bPrint{display:none}.bline{display:flex;align-items:center;gap:8px}.bline input,.ball input{width:22px;height:22px;flex:none;accent-color:var(--or)}.ball{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx2);margin:4px 0 2px}
 @media print{body.bprint>*:not(#bPrint){display:none!important}body.bprint #bPrint{display:block!important}body.bprint #bPrint #resBox{display:block!important}.bpage{break-after:page}.bpage:last-child{break-after:auto}}
+@page lab{size:150mm 100mm;margin:4mm}
+.lab{page:lab;break-after:page;width:142mm;height:91mm;box-sizing:border-box;padding:2mm 3mm;color:#000;font-family:system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}.lab:last-child{break-after:auto}
+.lab .lh{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1mm solid #000;padding-bottom:1.5mm;font-size:6mm}.lab .lh span{font-size:4.2mm}
+.lab .lbig{font-size:19mm;font-weight:800;text-align:center;margin:5mm 0 2mm;letter-spacing:-.02em}.lab .lbig small{font-size:7mm}.lab .lmid{text-align:center;font-size:6mm}.lab .lf{margin-top:auto;font-size:4.6mm;border-top:.4mm solid #000;padding-top:1.5mm}
+.lab .lt{width:100%;border-collapse:collapse;font-size:5.2mm;margin-top:2mm}.lab .lt th{text-align:left;font-size:3.8mm;border-bottom:.4mm solid #000}.lab .lt td{padding:1mm 0;border-bottom:.2mm solid #999}
+@media print{body.lprint #bPrint{background:#fff}}
 </style>
 </head>
 <body>
@@ -512,7 +518,7 @@ function solveUniform(box,qty,P,opts={}){
 
 
 /* ===== Paleta z płyty: dobór wymiaru (zasady jak w GDS) ===== */
-const DEST={PL:{deck:18,pack:20,margin:10,lieAdd:0,shapes:[[250,100],[140,140]]},ES:{deck:36,pack:30,margin:20,lieAdd:20,shapes:[[250,120],[140,140]]}};
+const DEST={PL:{deck:18,pack:20,margin:10,round:'up',lieAdd:0,shapes:[[250,100],[140,140]]},ES:{deck:36,pack:30,margin:20,round:'max',lieAdd:20,shapes:[[250,120],[140,140]]}};
 function palletBuild(L,W,cfg){ /* masa i lista cięcia palety z płyty */
   const kgm2=cfg.boardKgM2??12.7,board=cfg.boardMm??18,deck=cfg.deckMm,ph=cfg.palH??15;
   const deckKg=L*W/1e4*kgm2*deck/board;
@@ -545,13 +551,16 @@ function solveCustom(boxes,cfg,opts={}){
   const strats=cfg.layout&&cfg.layout!=='auto'?[cfg.layout]:['up','side','flat'];
   const runs=[];const budget=opts.ms??3000;const per=Math.max(120,budget/(strats.length*4));
   for(const st of strats){
-    const lying=st!=='up';const extraH=(cfg.dest==='ES'&&lying)?D.lieAdd:0;const extraM=(cfg.dest==='ES'&&lying)?D.lieAdd:0;
+    const lying=st!=='up';const extraH=(cfg.dest==='ES'&&lying)?D.lieAdd:0;const extraM=0; /* obrys: PL +10 i w górę do pełnych 10 cm, ES najwyżej +20 (pełne 10 cm) */
     const Hload=maxTot-ph-extraH;const margin=D.margin+extraM;
-    const bx=boxes.map(b=>b.solid?orientSolid(b,st,Hload):((cfg.panelUp===false||cfg.dest==='ES')?{...b,side:false,pose:'flat'}:orientPanel(b,Hload)));
+    const bx=boxes.map(b=>b.solid?orientSolid(b,b.fix&&b.fix!=='auto'?b.fix:st,Hload):(b.fix==='flat'?{...b,side:false,pose:'flat'}:b.fix==='upright'?orientPanel(b,Hload):((cfg.panelUp===false||cfg.dest==='ES')?{...b,side:false,pose:'flat'}:orientPanel(b,Hload))));
     const mL=Math.max(...bx.map(b=>Math.max(b.l,b.w))),mW=Math.max(...bx.map(b=>Math.min(b.l,b.w)));
     const shrink=(pl)=>{
         const mx=Math.max(...pl.placed.map(q=>q.x+q.l)),my=Math.max(...pl.placed.map(q=>q.y+q.w)),top=topOf(pl);
-        let L=Math.ceil(mx+margin-1e-9),W=Math.ceil(my+margin-1e-9);L=Math.max(L,minL);W=Math.max(W,minW);
+        const fitS=(a,b)=>(D.shapes||[]).some(([x,y])=>Math.max(a,b)<=x+1e-9&&Math.min(a,b)<=y+1e-9);
+        const rnd=v=>{const t=v+margin;let r=D.round==='max'?Math.floor(t/10+1e-9)*10:Math.ceil(t/10-1e-9)*10;if(D.round==='max'&&r<v+Math.min(10,margin)-1e-9)r=Math.ceil((v+Math.min(10,margin))/10-1e-9)*10;return r};
+        let L=Math.max(rnd(mx),minL),W=Math.max(rnd(my),minW);
+        if(!fitS(L,W)){const L0=Math.max(Math.ceil(mx+margin-1e-9),minL),W0=Math.max(Math.ceil(my+margin-1e-9),minW);if(fitS(L0,W)&&!fitS(L,W))L=L0;if(!fitS(L,W)&&fitS(L,W0))W=W0;if(!fitS(L,W)){L=L0;W=W0}}
         let placed=pl.placed;
         if(W>L){[L,W]=[W,L];placed=placed.map(q=>({...q,x:q.y,y:q.x,l:q.w,w:q.l}))}
         const bxL=Math.max(...placed.map(q=>q.x+q.l)),bxW=Math.max(...placed.map(q=>q.y+q.w));
@@ -650,6 +659,7 @@ ${isUni?'':`<div class="wseg" style="margin:0 0 8px"><button data-type="flat" cl
 <div class="f2"><div style="width:96px"><label class="lbl">Waga (kg/szt.)</label><input type="number" min="0" inputmode="decimal" data-k="kg" value="${it.kg}" placeholder="${kgPh(it)}"></div>
 <div><label class="lbl">Ilość</label><span class="qty"><button data-d="-1" aria-label="Mniej">−</button><input type="number" min="1" inputmode="numeric" data-k="q" value="${it.q}" placeholder="${isUni?'max':''}"><button data-d="1" aria-label="Więcej">+</button></span></div></div>
 <div class="f2" style="margin-top:6px"><label class="tog"><input type="checkbox" data-k="fragile" ${it.fragile?'checked':''}>Delikatna – nic na niej</label>${!flat&&palMode==='std'?`<label class="tog"><input type="checkbox" data-k="side" ${it.side?'checked':''}>Może leżeć na boku</label>`:''}</div>
+${!isUni&&palMode==='custom'?`<div class="wseg pseg" style="margin:8px 0 0"><span class="lbl" style="margin:0 4px 0 0">Pakowanie:</span>${(flat?[['auto','Auto'],['upright','Na sztorc'],['flat','Płasko']]:[['auto','Auto'],['up','W pionie'],['side','Na boku'],['flat','Płasko']]).map(([k,t])=>`<button data-pose="${k}" class="${(it.pose||'auto')===k?'on':''}">${t}</button>`).join('')}</div>`:''}
 ${it.note?`<p class="msg warn" style="margin:8px 0 0;font-size:12px">${esc(it.note)}</p>`:''}</div></div>`}
 function renderItems(){if(mode==='uni'){$('items').innerHTML=itemCard(uni,0,true);$('addItem').hidden=true;$('uniInfo').hidden=false}
 else{$('items').innerHTML=items.map((it,i)=>itemCard(it,i,false)).join('')||'<p class="muted" style="margin:0 0 10px">Dodaj pierwszą paczkę.</p>';$('addItem').hidden=false;$('uniInfo').hidden=true}hint()}
@@ -658,7 +668,8 @@ const itemOf=row=>row.dataset.i==='u'?uni:items[+row.dataset.i];
 $('items').addEventListener('input',e=>{const row=e.target.closest('.pal');if(!row)return;const it=itemOf(row),k=e.target.dataset.k;if(!k)return;
 if(k==='fragile'||k==='side')it[k]=e.target.checked;else if(k==='n')it.n=e.target.value;else it[k]=e.target.value===''?'':+e.target.value;if(['l','w','h'].includes(k)){const inp=row.querySelector('[data-k=kg]');if(inp)inp.placeholder=kgPh(it)}hint();setStep(2)});
 $('items').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){items.splice(+rm.dataset.rm,1);renderItems();return}
-const tp=e.target.closest('[data-type]');if(tp){const it=itemOf(tp.closest('.pal'));if(it.t!==tp.dataset.type){it.t=tp.dataset.type;if(it.t==='flat'&&(!(+it.h>0)||+it.h>5))it.h=1.8;if(it.t==='solid'&&+it.h<=5)it.h='';renderItems()}return}
+const ps=e.target.closest('[data-pose]');if(ps){const it=itemOf(ps.closest('.pal'));it.pose=ps.dataset.pose==='auto'?'':ps.dataset.pose;renderItems();setStep(2);return}
+const tp=e.target.closest('[data-type]');if(tp){const it=itemOf(tp.closest('.pal'));if(it.t!==tp.dataset.type){it.t=tp.dataset.type;it.pose='';if(it.t==='flat'&&(!(+it.h>0)||+it.h>5))it.h=1.8;if(it.t==='solid'&&+it.h<=5)it.h='';renderItems()}return}
 const d=e.target.closest('[data-d]');if(d){const row=d.closest('.pal');const it=itemOf(row);it.q=Math.max(1,(+it.q||0)+(+d.dataset.d));row.querySelector('[data-k=q]').value=it.q;hint()}});
 $('addItem').onclick=()=>{items.push(emptyItem());renderItems();const rows=$('items').querySelectorAll('.pal');const row=rows[rows.length-1];if(row){row.scrollIntoView({block:'nearest'});row.querySelector('[data-k=l]').focus()}};
 function setMode(m){mode=m;if(m==='uni'&&palMode==='custom'){palMode='std';document.querySelectorAll('#pSeg button').forEach(b=>b.classList.toggle('on',b.dataset.p==='std'));$('customBox').hidden=true;$('stdBox').hidden=false;palHint()}document.querySelectorAll('#mSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$('goTxt').textContent=m==='uni'?'Policz kartony na palecie':'Ułóż na palecie';renderItems()}
@@ -745,7 +756,9 @@ el.innerHTML=`<details class="bat" open><summary>Zamówienia z plików <small>${
 <label class="ball"><input type="checkbox" id="bAll"${batch.every(b=>b.sel)?' checked':''}> Zaznacz wszystkie</label>
 ${batch.map((b,i)=>`<div class="bline"><input type="checkbox" class="bsel" data-i="${i}"${b.sel?' checked':''} aria-label="Zaznacz ${esc(b.ord)}"><button class="brow${b.on?' on':''}" data-i="${i}"><span><b>${esc(b.ord)}</b>${b.due?' · '+esc(b.due):''}<br><small>${b.items.length} poz.</small></span><small class="bst ${b.cls||''}">${b.st||''}</small></button></div>`).join('')}
 <button class="btn or" id="batchGo" style="width:100%;margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>Policz i zapisz wszystkie (${batch.length})</button>
-<button class="btn" id="batchPrint" style="width:100%;margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>Drukuj zaznaczone (${batch.filter(b=>b.sel).length})</button></details>`;
+<button class="btn" id="batchPrint" style="width:100%;margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z"/></svg>Drukuj zaznaczone (${batch.filter(b=>b.sel).length})</button>
+<button class="btn" id="batchLab" style="width:100%;margin-top:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>Palety na dziś – etykiety 150×100 (${batch.filter(b=>b.sel).length})</button></details>`;
+$('batchLab').onclick=printLabels;
 el.querySelectorAll('.bsel').forEach(x=>x.onchange=()=>{batch[+x.dataset.i].sel=x.checked;renderBatch()});$('bAll').onchange=e=>{batch.forEach(b=>b.sel=e.target.checked);renderBatch()};$('batchPrint').onclick=printBatch;
 el.querySelectorAll('.brow').forEach(x=>x.onclick=()=>{openBatch(+x.dataset.i);renderBatch()});$('batchGo').onclick=runBatch}
 function openBatch(i){batch.forEach((b,k)=>b.on=k===i);const b=batch[i];setMode('mixed');items=b.items.map(x=>({...x}));renderItems();$('ordNo').value=b.ord;$('ordDate').value=b.due;$('planName').value='';currentPlanId=null;currentPlanName='';setStep(2)}
@@ -757,6 +770,20 @@ $('printImg').src=snapshot().toDataURL('image/png');const pg=document.createElem
 renderBatch();if(keep.on>=0)openBatch(keep.on);result=keep.result;curPal=keep.curPal;if(result)showResult();
 document.body.classList.add('bprint');const done=()=>{document.body.classList.remove('bprint');out.innerHTML='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);
 setTimeout(()=>{try{window.print()}catch(e){done();sm.innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}},250)}
+async function ensureRes(b){if(b.res)return b.res;const i=batch.indexOf(b);openBatch(i);result=null;quiet=true;try{await calculate()}finally{quiet=false}b.res=result;return result}
+async function printLabels(){const sel=batch.filter(b=>b.sel);const sm=$('saveMsg');if(!sel.length){sm.innerHTML='<p class="msg err">Zaznacz zamówienia.</p>';return}if(running)return;
+const keep={result,curPal,on:batch.findIndex(b=>b.on)};const rows=[];
+for(const b of sel){const r=await ensureRes(b);if(!r||!r.custom)continue;r.pallets.forEach((p,k)=>rows.push({b,r,p,k,n:r.pallets.length}))}
+renderBatch();if(keep.on>=0)openBatch(keep.on);result=keep.result;curPal=keep.curPal;if(result)showResult();
+if(!rows.length){sm.innerHTML='<p class="msg err">Brak palet z płyty do wydruku.</p>';return}
+const today=new Date().toLocaleDateString('pl-PL'),D={PL:'POLSKA',ES:'HISZPANIA'};
+const grp={};rows.forEach(x=>{const d=x.r.dest||'PL',key=d+'|'+x.p.L+'|'+x.p.W;(grp[key]=grp[key]||{d,L:x.p.L,W:x.p.W,deck:x.p.deck,c:0,o:new Set()}).c++;grp[key].o.add(x.b.ord)});
+const G=Object.values(grp).sort((a,b)=>a.d.localeCompare(b.d)||b.L-a.L||b.W-a.W);const pages=[];
+for(let i=0;i<G.length;i+=7)pages.push(`<div class="lab"><div class="lh"><b>PALETY NA DZIŚ</b><span>${today}${G.length>7?' · '+(i/7+1)+'/'+Math.ceil(G.length/7):''}</span></div><table class="lt"><tr><th>Wymiar</th><th>Blat</th><th>Kraj</th><th>Szt.</th></tr>${G.slice(i,i+7).map(g=>`<tr><td><b>${g.L} × ${g.W}</b></td><td>${g.deck} mm</td><td>${g.d}</td><td><b>${g.c}</b></td></tr>`).join('')}</table><div class="lf">Razem: <b>${rows.length}</b> pal. · zamówień: ${sel.length}</div></div>`);
+rows.forEach(x=>{const d=x.r.dest||'PL';pages.push(`<div class="lab"><div class="lh"><b>${esc(x.b.ord)}</b><span>${x.b.due?'termin '+esc(x.b.due):''}</span></div><div class="lbig">${x.p.L} × ${x.p.W} <small>cm</small></div><div class="lmid"><b>${D[d]||d}</b> · blat ${x.p.deck} mm · paleta ${x.k+1}/${x.n}</div><div class="lf">wys. z paletą ${x.p.tot} cm · ok. ${Math.round(x.p.gross)} kg · ${x.p.placed.length} el.</div></div>`)});
+const out=$('bPrint');out.innerHTML=pages.join('');document.body.classList.add('bprint','lprint');
+const done=()=>{document.body.classList.remove('bprint','lprint');out.innerHTML='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);
+setTimeout(()=>{try{window.print()}catch(e){done();sm.innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}},200)}
 async function runBatch(){if(running)return;const go=$('batchGo');go.disabled=true;let ok=0,err=0;const canSave=!!db&&!(multi&&!cid);
 for(let i=0;i<batch.length;i++){const b=batch[i];b.st='liczę…';b.cls='';openBatch(i);renderBatch();$('batchGo').disabled=true;
 result=null;quiet=true;try{await calculate()}finally{quiet=false}b.res=result;if(!result){b.st='✗ nie da się ułożyć';b.cls='bad';err++;continue}
@@ -780,10 +807,10 @@ const Dd={...PalletEngine.DEST[C.dest],...C.destOverride};const kgCap=custom?Mat
 for(let i=0;i<items.length;i++){const it=items[i];const l=+it.l,w=+it.w,h=+it.h,q=Math.round(+it.q||0);
 if(!(l>0&&w>0&&h>0&&q>0)){msg(`Uzupełnij wymiary i ilość pozycji ${esc(it.n||LETTERS[i]||i+1)}.`);return}
 const nm=it.n||(isFlat(it)?'Formatka ':'Mebel ')+(LETTERS[i]||i+1),kg1=kgOf(it),flat=isFlat(it);
-for(let k=0;k<q;k++)plain.push({id:i+'_p'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side});
+for(let k=0;k<q;k++)plain.push({id:i+'_p'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:it.pose||''});
 if(flat&&!it.fragile&&q>1){const maxPer=Math.max(1,Math.min(Math.floor(Hst/h+1e-9),kg1>0?Math.floor(kgCap/kg1+1e-9):1e9));const ns=Math.ceil(q/maxPer);let left=q;
-for(let s2=0;s2<ns;s2++){const c=Math.ceil(left/(ns-s2));left-=c;boxes.push({id:i+'_s'+s2,g:i,n:nm,l,w,h:r1(h*c*1000)/1000,kg:kg1*c,cnt:c,ph:h,flat:true,solid:false,fragile:false,side:false})}}
-else for(let k=0;k<q;k++)boxes.push({id:i+'_'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side})}
+for(let s2=0;s2<ns;s2++){const c=Math.ceil(left/(ns-s2));left-=c;boxes.push({id:i+'_s'+s2,g:i,n:nm,l,w,h:r1(h*c*1000)/1000,kg:kg1*c,cnt:c,ph:h,flat:true,solid:false,fragile:false,side:false,fix:it.pose||''})}}
+else for(let k=0;k<q;k++)boxes.push({id:i+'_'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:it.pose||''})}
 if(!boxes.length){msg('Dodaj przynajmniej jedną pozycję.');return}if(boxes.length>400){msg('Maksymalnie 400 pozycji w jednym planie.');return}
 const ms=Math.min(4500,custom?1500+boxes.length*30:1200+boxes.length*25);const t0=Date.now();const tick=setInterval(()=>bar.style.width=Math.min(95,(Date.now()-t0)/ms*100)+'%',100);
 await new Promise(r=>setTimeout(r,20));res=custom?PalletEngine.solveCustom(boxes,C,{ms,alts:plain.length!==boxes.length&&plain.length<=80?[plain]:[]}):PalletEngine.solveMixed(boxes,P,{ms});clearInterval(tick);src=items.map(x=>({...x}))}
