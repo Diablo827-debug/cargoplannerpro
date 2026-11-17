@@ -10,18 +10,16 @@ service cloud.firestore {
     // Sprawdzenie w aplikacji, czy zalogowany jest administratorem
     match /meta/super { allow read: if isSuper(); }
 
-    // Lista nazw firm do wyboru przy rejestracji (same nazwy, bez danych)
+    // Lista nazw firm – widzą tylko główni administratorzy (zwykli użytkownicy nie widzą nazw firm)
     match /directory/{cid} {
-      allow read: if signedIn();
+      allow read: if isSuper();
       allow write: if isSuper();
     }
 
     // Prośby o dostęp: użytkownik wysyła tylko w swoim imieniu, akceptuje administrator
     match /requests/{rid} {
       allow read: if signedIn() && (resource.data.email == me() || isSuper());
-      allow create: if signedIn()
-        && request.resource.data.email == me()
-        && rid == request.resource.data.cid + '_' + me();
+      allow create: if false;
       allow delete: if signedIn() && (resource.data.email == me() || isSuper());
     }
 
