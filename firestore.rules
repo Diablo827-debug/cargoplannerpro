@@ -4,7 +4,7 @@ service cloud.firestore {
     function signedIn() { return request.auth != null && request.auth.token.email != null; }
     function me() { return request.auth.token.email.lower(); }
     // GŁÓWNI ADMINISTRATORZY – wpisz e-maile małymi literami
-    function isSuper() { return signedIn() && me() in ['lukasz.grudka@gmail.com']; }
+    function isSuper() { return signedIn() && me() in ['lukasz.grudka@gmail.com', 'agata.kusmierz@mebway.pl']; }
     function company(cid) { return get(/databases/$(database)/documents/companies/$(cid)).data; }
 
     // Sprawdzenie w aplikacji, czy zalogowany jest administratorem
