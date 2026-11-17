@@ -3,6 +3,10 @@
 Planer załadunku palet: dobór auta (bus / solówka / TIR), plan ustawienia 2D, kolejność załadunku, wydruk arkusza.
 Aplikacja webowa (PWA) – instalowana na komputerze, laptopie i telefonie. Dane: Firebase (Auth + Firestore), osobne przestrzenie dla firm.
 
+## Aplikacje
+- `/` – Cargo Planner Pro [GDS]: dobór auta i plan załadunku palet.
+- `/paleta/` – Pallet Planner Pro [GDS]: pakowanie mebli i paczek na palety (3D, warstwy). Wspólne konta i firmy.
+
 ## Wdrożenie
 - Hosting: Cloudflare Workers (statyczne pliki z folderu `public/`, konfiguracja w `wrangler.jsonc`, wdrożenie: `npx wrangler deploy`).
 - `public/` – aplikacja (index.html, firebase-config.js, PWA).

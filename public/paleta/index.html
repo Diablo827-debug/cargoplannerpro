@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pallet Planner Pro [GDS]</title>
+<meta name="author" content="Łukasz Grudka – Grudka Digital System">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b111b">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pallet Planner"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#0b111b;--panel:#121b28;--card:#182334;--card2:#1f2c40;--tx:#eef2f7;--tx2:#9babbf;--tx3:#6f7f94;--bd:#2a3a50;--or:#f7931e;--or2:#ff9f2e;--orbg:#3a250f;--ok:#58d26a;--okbg:#14301c;--okbd:#2f9a45;--bad:#ff7b7b;--badbg:#3b1a1f;--warn:#ffbf5e;--warnbg:#3a2a12;--r:14px;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+input,select,button{font:inherit;font-size:16px;color:var(--tx)}
+.app{max-width:1280px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;gap:12px;padding:6px 2px 10px}
+.top .logo{flex:none}
+.top h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em}.top h1 em{font-style:normal;color:var(--or)}
+.top p{margin:1px 0 0;color:var(--tx2);font-size:13px}
+.top .user{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--tx2);font-size:13px;text-align:right}
+.iconbtn{background:var(--card);border:1px solid var(--bd);border-radius:10px;width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);padding:0}
+.steps{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin:0 0 14px}
+.step{display:flex;align-items:center;gap:9px;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+.step .n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;background:#3a4658;color:#dfe5ee;flex:none}
+.step.on .n{background:linear-gradient(180deg,var(--or2),#ec760a);color:#fff;box-shadow:0 0 0 4px rgba(247,147,30,.18)}
+.step.done .n{background:var(--okbd);color:#fff}
+.step b{display:block;font-size:15px}.step span{display:block;font-size:12px;color:var(--tx2)}
+.arrow{flex:1;height:2px;background:var(--bd);min-width:14px;position:relative}.arrow:after{content:"";position:absolute;right:-1px;top:-4px;border:5px solid transparent;border-left-color:var(--bd)}
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:1000px){.grid{grid-template-columns:minmax(380px,440px) 1fr;align-items:start}.colL{position:sticky;top:12px}}
+.colL,.colR{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:14px}
+.card h2{margin:0 0 12px;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2 .num{color:var(--or)}.card h2 small{margin-left:auto;font-weight:400;color:var(--tx2);font-size:13px}
+details.card>summary{list-style:none;cursor:pointer;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+details.card>summary::-webkit-details-marker{display:none}
+details.card>summary:after{content:"";margin-left:auto;width:8px;height:8px;border-right:2px solid var(--tx2);border-bottom:2px solid var(--tx2);transform:rotate(45deg);transition:transform .15s}
+details.card[open]>summary:after{transform:rotate(-135deg)}
+details.card[open]>summary{margin-bottom:12px}
+details.card>summary small{font-weight:400;color:var(--tx2);font-size:13px}
+.lbl{font-size:12px;color:var(--tx2);display:block;margin-bottom:3px}
+input[type=number],input[type=text],input[type=email],input[type=password],select{width:100%;background:var(--card2);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;min-width:0;text-align:left}
+input[type=number]{text-align:center;-moz-appearance:textfield}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input:focus,select:focus{outline:2px solid var(--or);outline-offset:-1px}
+button{cursor:pointer}
+.btn{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600}
+.btn:hover{border-color:var(--tx3)}.btn svg{width:18px;height:18px;flex:none}
+.btn.or{background:linear-gradient(180deg,var(--or2),#ec760a);border-color:var(--or);color:#fff;box-shadow:0 6px 18px rgba(247,147,30,.25)}
+.btn.big{width:100%;padding:15px;font-size:18px;border-radius:13px}.btn.big svg{width:22px;height:22px}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.sm{padding:6px 10px;font-size:14px;border-radius:8px}
+.pal{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;display:grid;grid-template-columns:62px 1fr;gap:10px;margin-bottom:10px}
+.pal .ico{width:62px;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1.5px solid}
+.pal .hd{display:flex;align-items:center;gap:8px;margin-bottom:6px}.pal .hd b{font-size:15px}
+.pal .hd .del{margin-left:auto;background:none;border:none;color:var(--tx3);font-size:22px;line-height:1;padding:0 4px}
+.pal .f3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.pal .f2{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--bd);border-radius:9px;overflow:hidden;background:var(--card2)}
+.qty button{background:none;border:none;width:36px;height:36px;font-size:20px;color:var(--tx)}
+.qty input{width:52px;border:none;border-radius:0;background:none;padding:6px 0;text-align:center}
+.tog{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--tx2);cursor:pointer;user-select:none}
+.tog input{appearance:none;width:20px;height:20px;border:1.5px solid var(--tx3);border-radius:5px;margin:0;display:grid;place-content:center;background:var(--card2)}
+.tog input:checked{background:var(--or);border-color:var(--or)}.tog input:checked:after{content:"";width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.add{width:100%;border:1.5px dashed var(--tx3);background:none;border-radius:11px;padding:11px;color:var(--tx);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chips button{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:5px 11px;font-size:13px;color:var(--tx2)}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;color:var(--tx)}
+.mode svg{width:36px;height:36px}.mode span{font-weight:400;font-size:12px;color:var(--tx2);text-align:center}
+.mode.on{background:linear-gradient(180deg,var(--or2),#ec760a);border-color:var(--or);color:#fff}.mode.on span{color:#ffe9d1}
+.row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.muted{color:var(--tx2);font-size:13px}
+.msg{font-size:14px;padding:10px 12px;border-radius:10px;margin:0}
+.msg.err{background:var(--badbg);color:var(--bad)}.msg.warn{background:var(--warnbg);color:var(--warn)}.msg.info{background:var(--card2);color:var(--tx2)}
+.prog{height:5px;background:var(--card2);border-radius:3px;overflow:hidden;margin-top:10px}.prog i{display:block;height:100%;width:0;background:var(--or)}
+.empty{text-align:center;padding:40px 16px;color:var(--tx2)}
+.empty svg{width:64px;height:64px;color:var(--tx3);margin-bottom:8px}
+.rec{border:1.5px solid var(--okbd);border-radius:var(--r);background:linear-gradient(180deg,rgba(47,154,69,.12),rgba(47,154,69,.03))}
+.rec.bad{border-color:#a8434a;background:linear-gradient(180deg,rgba(168,67,74,.15),rgba(168,67,74,.03))}
+.rec .bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:10px 14px;border-bottom:1px solid rgba(47,154,69,.35);font-weight:700;color:var(--ok)}
+.rec.bad .bar{color:var(--bad);border-color:rgba(168,67,74,.4)}
+.rec .ck{width:24px;height:24px;border-radius:50%;background:var(--okbd);display:flex;align-items:center;justify-content:center;flex:none}
+.rec.bad .ck{background:#a8434a}
+.rec .main{display:grid;grid-template-columns:1fr;gap:12px;padding:14px}
+@media(min-width:700px){.rec .main{grid-template-columns:minmax(200px,0.9fr) 1.2fr}}
+.rec .veh h3{margin:0 0 6px;font-size:21px}.rec .veh svg{width:100%;max-width:260px;height:auto;display:block}
+.stats{display:flex;flex-direction:column}.stats>div{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
+.stats>div>span{color:var(--tx2)}.stats>div>b{font-weight:700;text-align:right}
+.meter{height:8px;border-radius:5px;background:var(--card2);overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;background:var(--ok);border-radius:5px}
+.planbox{padding:0 14px 14px}.planbox h4{margin:4px 0 8px;font-size:15px}
+.vlist{display:flex;flex-direction:column;gap:8px}
+.vitem{display:grid;grid-template-columns:70px 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 10px;cursor:pointer;text-align:left;width:100%}
+.vitem.sel{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+.vitem svg{width:70px;height:auto}.vitem b{display:block;font-size:15px}.vitem small{display:block;color:var(--tx2);font-size:12px}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge.best{background:var(--okbg);color:var(--ok)}.badge.ok{background:var(--warnbg);color:var(--warn)}.badge.no{background:var(--badbg);color:var(--bad)}
+.pct{display:block;margin-top:5px;height:6px;border-radius:4px;background:var(--card2);overflow:hidden;width:100%}.pct i{display:block;height:100%}
+.order{display:flex;flex-direction:column;gap:4px;font-size:14px}.order div{display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--bd)}
+.order .nb{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions .grow{flex:1;min-width:180px}
+.saved .it{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--bd)}.saved .it:first-child{border-top:none}
+.saved .it .t{flex:1;min-width:0}.saved .it b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.saved .it span{font-size:12px;color:var(--tx2)}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=date]{width:100%;background:var(--card2);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;min-width:0;color:var(--tx);color-scheme:dark}
+.x{background:none;border:none;color:var(--tx3);font-size:20px;padding:2px 6px}
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+#login form{background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.printonly{display:none}
+@media print{
+@page{size:A4;margin:10mm}.top{padding:0 0 4px}.top p{display:none}#secRes,#resBox{gap:6px!important}.order{font-size:12px}.order div{padding:2px 0!important}.card{padding:8px 10px}
+#othersCard,.rec .veh,.rec .stats,.rec .bar,.planbox>p{display:none!important}.rec .main{display:none!important}#orderCard{break-inside:auto}.order .nb{background:#fff!important;color:#111!important;border:1.5px solid #111!important}.rec .main{grid-template-columns:1fr!important;padding:6px 0}.rec{border:none!important;background:none!important}.planbox{padding:0}#orderCard{display:block}#orderCard>summary:after{display:none}
+.order div{padding:3px 0}.order .nb{-webkit-print-color-adjust:exact}
+
+@page{size:A4;margin:12mm}
+:root{--bg:#fff;--panel:#fff;--card:#fff;--card2:#f1f3f6;--tx:#111;--tx2:#555;--tx3:#888;--bd:#ccc;--ok:#1b7a2c;--okbg:#e5f4e8;--okbd:#2f9a45;--bad:#b3262e;--badbg:#fbe5e6;--warn:#8a5a00;--warnbg:#fff1d6;color-scheme:light}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.colL,.steps,.noprint,#login,.top .user{display:none!important}
+.grid{display:block}.card,.rec{break-inside:avoid;border-color:#bbb;margin-bottom:10px}
+.printonly{display:block}
+}
+@media(max-width:600px){
+.top h1{font-size:20px}.top p{display:none}.top .user span{display:none}
+.steps{padding:10px}.step span span{display:none}.step b{font-size:14px}.step .n{width:30px;height:30px}
+.vitem{grid-template-columns:62px 1fr}.vitem svg{width:62px}.vitem .badge{grid-column:2;justify-self:start}
+.rec .bar .why{margin-left:0!important;width:100%}
+}
+.wseg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:-4px 0 12px}
+.wseg button{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--tx2)}
+.wseg button.on{background:var(--orbg);border-color:var(--or);color:var(--or2);font-weight:600}
+.pal.nokg .f3{grid-template-columns:1fr 1fr}.pal.nokg .kgf{display:none}
+.cobar{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--bd);border-radius:var(--r);padding:8px 10px;margin:0 0 12px}
+.cobar select{flex:1;font-weight:700;background:var(--card2)}
+#coCard{margin:0 0 12px}.mem{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--bd);font-size:14px}.mem:first-child{border-top:none}.mem>span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--orbg);color:var(--or2)}
+.gds{display:inline-block;vertical-align:middle;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--or2);border:1.5px solid var(--or);border-radius:6px;padding:1px 6px;margin-left:4px;position:relative;top:-2px}
+.foot{text-align:center;color:var(--tx3);font-size:12px;padding:22px 10px 6px;line-height:1.6}.foot b{color:var(--tx2);font-weight:600}
+@media print{.foot{color:#555;padding:10px 0 0;font-size:10px}.gds{color:#c56a00;border-color:#c56a00}}
+</style>
+<style>
+.drop{border:1.5px dashed var(--tx3);border-radius:12px;padding:14px;text-align:center;color:var(--tx2);cursor:pointer;margin-bottom:12px;font-size:14px}
+.drop.on{border-color:var(--or);background:var(--orbg);color:var(--or2)}
+.drop b{color:var(--tx)}
+.pal .f4{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.pal .nm{width:100%;background:none;border:none;border-bottom:1px solid var(--bd);border-radius:0;padding:2px 0;font-weight:700;font-size:15px}
+.pal .nm:focus{outline:none;border-color:var(--or)}
+.view3d{position:relative;background:radial-gradient(ellipse at 50% 30%,#1c2a3e,#0f1724);border:1px solid var(--bd);border-radius:12px;overflow:hidden;touch-action:none}
+.view3d canvas{display:block;width:100%;height:auto;cursor:grab}
+.view3d .tools{position:absolute;right:8px;top:8px;display:flex;gap:6px}
+.view3d .tools button{width:34px;height:34px;border-radius:9px;background:rgba(15,23,36,.8);border:1px solid var(--bd);color:var(--tx2);font-size:16px;padding:0}
+.view3d .hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:var(--tx3)}
+.ptabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.ptabs button{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:6px 12px;font-size:13px;color:var(--tx2);font-weight:600}
+.ptabs button.on{background:var(--orbg);border-color:var(--or);color:var(--or2)}
+.lv{border-top:1px solid var(--bd);padding:8px 0}.lv:first-child{border-top:none}
+.lv summary{cursor:pointer;font-weight:600;font-size:14px}.lv summary span{color:var(--tx2);font-weight:400}
+.kpi{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(min-width:700px){.kpi{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi div{background:var(--card2);border-radius:10px;padding:9px 11px}.kpi span{display:block;font-size:12px;color:var(--tx2)}.kpi b{font-size:18px}
+@media print{#resBox,.colR,#secRes{display:block!important}#resBox>*{margin-bottom:3mm}details.card>summary:after{display:none!important}.view3d,.ptabs,.rec{display:none!important}#printImg{display:block;max-height:100mm;width:auto!important;max-width:100%;margin:4mm auto!important;object-fit:contain}
+#viewCard,#lvCard,#orderCard{break-inside:auto!important;padding:4px 0!important;border:none!important}
+#levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3mm}.lv{border:none!important;padding:0!important;break-inside:avoid}.lv summary{font-size:10px;list-style:none}.lv summary::-webkit-details-marker{display:none}.lv svg{max-width:100%!important;margin:1mm 0 0!important}
+#lvCard>summary,#orderCard>summary{font-size:13px}.order{font-size:10.5px}.order div{padding:1px 0!important}.order .nb{width:18px;height:18px;font-size:10px}}
+</style>
+</head>
+<body>
+<div id="login"><form id="lf">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><svg width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.6" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="34" width="36" height="6" rx="1"/><path d="M10 40v3M24 40v3M38 40v3"/><rect x="9" y="22" width="14" height="12"/><rect x="25" y="22" width="14" height="12"/><rect x="15" y="10" width="18" height="12"/></svg><div><b style="font-size:20px">Pallet Planner <span style="color:#f7931e">Pro</span> <span class="gds">GDS</span></b><div class="muted" id="lsub">Zaloguj się, aby kontynuować</div></div></div>
+<div><label class="lbl" for="le">E-mail</label><input id="le" type="email" autocomplete="username" required></div>
+<div><label class="lbl" for="lp">Hasło</label><input id="lp" type="password" autocomplete="current-password" required minlength="6"></div>
+<div id="lp2box" hidden><label class="lbl" for="lp2">Powtórz hasło</label><input id="lp2" type="password" autocomplete="new-password" minlength="6"></div>
+<button class="btn or" type="submit" id="lb" style="padding:12px">Zaloguj</button>
+<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><button type="button" id="lr" style="background:none;border:none;color:#9babbf;font-size:14px;padding:0">Nie pamiętam hasła</button><button type="button" id="lmode" style="background:none;border:none;color:#f7931e;font-size:14px;font-weight:700;padding:0">Nie masz konta? Załóż konto</button></div>
+<div id="lmsg" class="muted"></div><div class="muted" style="font-size:11px;text-align:center;border-top:1px solid var(--bd);padding-top:10px">© 2026 Łukasz Grudka · Grudka Digital System (GDS)</div></form></div>
+<div class="app">
+<header class="top">
+<svg class="logo" width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="#f7931e" stroke-width="3.4" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="34" width="36" height="6" rx="1"/><path d="M10 40v3M24 40v3M38 40v3"/><rect x="9" y="22" width="14" height="12"/><rect x="25" y="22" width="14" height="12"/><rect x="15" y="10" width="18" height="12"/></svg>
+<div><h1>Pallet Planner <em>Pro</em> <span class="gds">GDS</span></h1><p>Pakowanie mebli na palety · 3D · warstwy · masa</p></div>
+<div class="user"><button class="btn sm or" id="install" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Zainstaluj</button><span id="who"></span><button class="iconbtn" id="logout" title="Wyloguj" aria-label="Wyloguj" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
+</header>
+<p class="msg info" id="installHelp" hidden style="margin:0 0 12px">Na iPhonie/iPadzie: otwórz w Safari, stuknij <b>Udostępnij</b> → <b>Do ekranu początkowego</b>. Na komputerze: w Chrome lub Edge kliknij ikonę instalacji po prawej stronie paska adresu.</p>
+<div class="cobar" id="coBar" hidden>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f7931e" stroke-width="2"><path d="M3 21V7l7-4v18M10 21h11V10l-11-3M14 13h3M14 17h3M6 10h1M6 14h1"/></svg>
+<select id="coSel" aria-label="Firma"></select>
+<button class="btn sm" id="coBtn" hidden>Administracja <span id="reqBadge" class="tag" hidden></span></button>
+</div>
+<details class="card" id="coCard" hidden><summary>Administracja firm</summary><div id="coBody"></div></details>
+<section class="card" id="coJoin" hidden style="margin:0 0 12px">
+<h2>Wybierz swoją firmę</h2>
+<p class="muted" style="margin:0 0 10px">Wybierz firmę, dla której pracujesz, i wyślij prośbę o dostęp. Administrator ją zatwierdzi, a firma pojawi się tutaj automatycznie.</p>
+<div id="joinPending"></div>
+<div class="row"><select id="joinSel" style="flex:1;min-width:180px"></select><button class="btn or" id="joinBtn">Wyślij prośbę</button></div>
+<p class="muted" id="joinMsg" style="margin:6px 0 0"></p>
+</section>
+<nav class="steps" aria-label="Kroki">
+<button class="step on" data-step="1" data-go="secPal"><span class="n">1</span><span><b>Paleta</b><span>Wymiary i limity</span></span></button><i class="arrow"></i>
+<button class="step" data-step="2" data-go="secLoad"><span class="n">2</span><span><b>Meble</b><span>Excel lub ręcznie</span></span></button><i class="arrow"></i>
+<button class="step" data-step="3" data-go="secRes"><span class="n">3</span><span><b>Wynik</b><span>3D, warstwy, wydruk</span></span></button>
+</nav>
+
+<div class="grid">
+<div class="colL">
+
+<section class="card" id="secOrder">
+<h2>Zlecenie</h2>
+<div class="fl">
+<div><label class="lbl" for="ordNo">Numer zlecenia</label><input type="text" id="ordNo" placeholder="np. ZL/2026/154"></div>
+<div><label class="lbl" for="ordDate">Termin realizacji</label><input type="date" id="ordDate"></div>
+</div>
+</section>
+
+<section class="card" id="secPal">
+<h2><span class="num">1.</span> Paleta <small id="palHint"></small></h2>
+<div class="fl">
+<div style="grid-column:1/-1"><label class="lbl" for="palType">Rodzaj palety</label><select id="palType">
+<option value="eur">EUR 120×80</option><option value="ind">Przemysłowa 120×100</option><option value="half">Półpaleta 80×60</option><option value="own">Własne wymiary</option></select></div>
+<div><label class="lbl" for="palL">Długość (cm)</label><input type="number" id="palL" value="120"></div>
+<div><label class="lbl" for="palW">Szerokość (cm)</label><input type="number" id="palW" value="80"></div>
+<div><label class="lbl" for="maxH">Maks. wysokość z paletą (cm)</label><input type="number" id="maxH" value="180"></div>
+<div><label class="lbl" for="maxKg">Maks. waga z paletą (kg)</label><input type="number" id="maxKg" value="1000"></div>
+</div>
+<details style="margin-top:12px"><summary class="muted" style="cursor:pointer;font-weight:600">Więcej ustawień</summary>
+<div class="fl" style="margin-top:10px">
+<div><label class="lbl" for="palH">Wysokość samej palety (cm)</label><input type="number" id="palH" value="14.4" step="0.1"></div>
+<div><label class="lbl" for="palKg">Waga samej palety (kg)</label><input type="number" id="palKg" value="25"></div>
+<div><label class="lbl" for="over">Dopuszczalny nawis (cm)</label><input type="number" id="over" value="0" min="0"></div>
+<div><label class="lbl" for="sup">Min. podparcie paczki (%)</label><input type="number" id="sup" value="75" min="50" max="100"></div>
+<div style="grid-column:1/-1"><label class="lbl" for="dens">Materiał – do liczenia wagi, gdy jej nie wpiszesz</label><div class="row"><select id="densSel" style="flex:1;min-width:160px"><option value="650">Płyta wiórowa (650 kg/m³)</option><option value="750">MDF (750 kg/m³)</option><option value="850">HDF (850 kg/m³)</option><option value="500">Sklejka (500 kg/m³)</option><option value="own">Własna gęstość</option></select><input type="number" id="dens" value="650" style="width:90px"><span class="muted">kg/m³</span></div></div>
+<label class="tog" style="grid-column:1/-1"><input type="checkbox" id="heavy" checked>Ciężkie na dół (nie stawiaj cięższej na lżejszej)</label>
+</div></details>
+</section>
+
+<section class="card" id="secLoad">
+<h2><span class="num">2.</span> Meble do spakowania <small id="itHint"></small></h2>
+<div class="wseg" id="mSeg"><button data-m="mixed" class="on">Meble / elementy</button><button data-m="uni">Jednakowe kartony</button></div>
+<div class="drop" id="drop" tabindex="0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-5px"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg> <b>Wrzuć plik zamówienia (Excel)</b><br><span style="font-size:12px">albo kliknij, aby wybrać · .xls, .xlsx, .csv</span><input type="file" id="file" accept=".xlsx,.xlsm,.xls,.csv" hidden></div>
+<div id="impMsg"></div>
+<div id="items"></div>
+<button class="add" id="addItem"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Dodaj element</button>
+<p class="muted" id="uniInfo" hidden style="margin:10px 0 0">Zostaw ilość pustą, a program policzy, ile kartonów zmieści się na jednej palecie.</p>
+</section>
+
+<div>
+<button class="btn or big" id="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 4l13 8-13 8z"/></svg><span id="goTxt">Ułóż na palecie</span></button>
+<div class="prog" id="prog" hidden><i></i></div>
+<div id="msgs" style="margin-top:10px"></div>
+</div>
+
+</div>
+<div class="colR">
+<section id="secRes">
+<div class="card empty" id="emptyRes"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="6" y="34" width="36" height="6" rx="1"/><rect x="9" y="22" width="14" height="12"/><rect x="25" y="22" width="14" height="12"/><rect x="15" y="10" width="18" height="12"/></svg><div style="font-weight:700;color:var(--tx);font-size:16px">Tu pojawi się układ na palecie</div><div>Ustaw paletę, dodaj meble lub elementy (albo wrzuć Excel) i kliknij „Ułóż na palecie”.</div></div>
+<div id="resBox" hidden style="display:flex;flex-direction:column;gap:14px">
+<div class="printonly" id="printHead"></div>
+<div class="rec" id="recCard"></div>
+<div class="card" id="viewCard">
+<div class="ptabs" id="ptabs"></div>
+<div class="view3d" id="v3"><canvas id="cv" width="900" height="640"></canvas>
+<div class="tools noprint"><button id="rotL" aria-label="Obróć w lewo">⟲</button><button id="rotR" aria-label="Obróć w prawo">⟳</button><button id="rotReset" aria-label="Widok domyślny">⌂</button></div>
+<div class="hint">Przeciągnij, aby obrócić</div></div>
+<img id="printImg" class="printonly" alt="" style="width:100%;margin-top:6px">
+</div>
+<details class="card" id="lvCard" open><summary>Warstwy – widok z góry <small id="lvHint"></small></summary><div id="levels"></div></details>
+<details class="card" id="orderCard"><summary>Kolejność układania <small id="orderHint"></small></summary><div class="order" id="order"></div></details>
+<div class="printonly"><div style="display:flex;gap:30px;margin-top:22px;font-size:12px;color:#555"><div style="flex:1;border-top:1px solid #999;padding-top:4px">Ułożył (data, podpis)</div><div style="flex:1;border-top:1px solid #999;padding-top:4px">Sprawdził (podpis)</div></div></div>
+<div class="card noprint">
+<h2>Gotowy plan</h2>
+<div class="actions">
+<input type="text" id="planName" class="grow" placeholder="Nazwa planu (domyślnie numer zlecenia)">
+<button class="btn or" id="save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>Zapisz plan</button>
+</div>
+<div class="actions" style="margin-top:8px">
+<button class="btn" id="pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></svg>PDF / Drukuj</button>
+<button class="btn" id="png"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Obraz (PNG)</button>
+<button class="btn" id="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg>Kopiuj opis</button>
+<button class="btn" id="newPlan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nowy plan</button>
+</div>
+<div id="saveMsg" style="margin-top:8px"></div>
+<textarea id="copyBox" hidden style="width:100%;min-height:130px;margin-top:8px;font:13px/1.4 ui-monospace,monospace;background:var(--card2);color:var(--tx);border:1px solid var(--bd);border-radius:9px;padding:8px"></textarea>
+</div>
+</div>
+</section>
+<details class="card saved noprint" id="secSaved">
+<summary>Moje plany <small id="savedHint">ładowanie…</small></summary>
+<div id="savedList"></div>
+</details>
+</div>
+</div>
+</div>
+
+<script>
+/* Silnik układania paczek na palecie – Pallet Planner Pro [GDS]
+   Współrzędne: x = długość palety, y = szerokość, z = wysokość (cm, od blatu palety). */
+(function(root){
+'use strict';
+
+/* Dozwolone orientacje paczki: [długość, szerokość, wysokość] */
+function orients(b){
+  const {l,w,h}=b;
+  const o=[[l,w,h],[w,l,h]];
+  if(b.side){o.push([l,h,w],[h,l,w],[w,h,l],[h,w,l])}
+  const seen=new Set();return o.filter(a=>{const k=a.join('x');if(seen.has(k))return false;seen.add(k);return true});
+}
+
+const ov=(a1,a2,b1,b2)=>Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));
+
+/* Jedna paleta: próba umieszczenia paczek w podanej kolejności (metoda punktów skrajnych). */
+function fillPallet(order,P,pref){
+  const X0=-P.over,Y0=-P.over,X1=P.L+P.over,Y1=P.W+P.over,H=P.H;
+  const placed=[];let kg=0;const rest=[];
+  let pts=[{x:0,y:0,z:0}];
+  const SUP=P.support??0.75;
+  for(const b of order){
+    if(P.maxKg&&kg+b.kg>P.maxKg+1e-9){rest.push(b);continue}
+    let best=null;
+    const os=orients(b);
+    const pi=pref?pref.get(b.id):0;
+    const ordO=pi?[os[pi%os.length],...os.filter((_,i)=>i!==pi%os.length)]:os;
+    for(const [l,w,h] of ordO){
+      for(const p of pts){
+        const x=p.x,y=p.y,z=p.z;
+        if(x<X0-1e-9||y<Y0-1e-9||x+l>X1+1e-9||y+w>Y1+1e-9||z+h>H+1e-9)continue;
+        const sc=z*1e6+x*1e3+y;
+        if(best&&sc>=best.sc)continue;
+        let bad=false;
+        for(const q of placed){if(x<q.x+q.l-1e-9&&x+l>q.x+1e-9&&y<q.y+q.w-1e-9&&y+w>q.y+1e-9&&z<q.z+q.h-1e-9&&z+h>q.z+1e-9){bad=true;break}}
+        if(bad)continue;
+        if(z>0){
+          let area=0;
+          for(const q of placed){
+            if(Math.abs(q.z+q.h-z)>1e-6)continue;
+            const a=ov(x,x+l,q.x,q.x+q.l)*ov(y,y+w,q.y,q.y+q.w);
+            if(a<=0)continue;
+            if(q.fragile){bad=true;break}               /* nic na delikatnej */
+            if(P.heavyDown&&q.h>(P.solidH??5)&&b.kg>q.kg+1e-9){bad=true;break} /* cięższa nie na lżejszej paczce (płaskie formatki ≤5 cm są pełne i nośne) */
+            area+=a;
+          }
+          if(bad||area<SUP*l*w-1e-6)continue;
+        }else{
+          /* na blacie palety: środek ciężkości paczki musi leżeć na palecie */
+          const cx=x+l/2,cy=y+w/2;if(cx<0||cy<0||cx>P.L||cy>P.W)continue;
+        }
+        best={x,y,z,l,w,h,sc};
+      }
+    }
+    if(!best){rest.push(b);continue}
+    const r={...b,x:best.x,y:best.y,z:best.z,l:best.l,w:best.w,h:best.h};
+    placed.push(r);kg+=b.kg;
+    const np=[{x:r.x+r.l,y:r.y,z:r.z},{x:r.x,y:r.y+r.w,z:r.z},{x:r.x,y:r.y,z:r.z+r.h},
+              {x:r.x+r.l,y:Y0<0?0:0,z:r.z},{x:0,y:r.y+r.w,z:r.z}];
+    for(const q of np){if(!pts.some(t=>Math.abs(t.x-q.x)<1e-9&&Math.abs(t.y-q.y)<1e-9&&Math.abs(t.z-q.z)<1e-9))pts.push(q)}
+    pts=pts.filter(t=>!placed.some(q=>t.x>=q.x-1e-9&&t.x<q.x+q.l-1e-9&&t.y>=q.y-1e-9&&t.y<q.y+q.w-1e-9&&t.z>=q.z-1e-9&&t.z<q.z+q.h-1e-9));
+    pts.sort((a,b)=>a.z-b.z||a.x-b.x||a.y-b.y);
+  }
+  return {placed,rest,kg};
+}
+
+function packAll(order,P,pref){
+  const pallets=[];let todo=order;let guard=0;
+  while(todo.length&&guard++<200){
+    const r=fillPallet(todo,P,pref);
+    if(!r.placed.length)return {pallets,unplaceable:todo};
+    pallets.push(r);todo=r.rest;
+  }
+  return {pallets,unplaceable:[]};
+}
+const topOf=pl=>pl.placed.reduce((m,q)=>Math.max(m,q.z+q.h),0);
+function cost(res){
+  if(res.unplaceable.length)return 1e12+res.unplaceable.length;
+  const n=res.pallets.length;const last=res.pallets[n-1];
+  const hs=res.pallets.reduce((a,p)=>a+topOf(p),0);
+  return n*1e7+topOf(last)*1e3+hs;
+}
+
+/* Kolejność startowa: ciężkie i duże najpierw, delikatne na końcu */
+function baseOrder(boxes){
+  return [...boxes].sort((a,b)=>(a.fragile-b.fragile)||(b.kg-a.kg)||(b.l*b.w-a.l*a.w)||(b.h-a.h));
+}
+
+/* Różne paczki: wielokrotne próby z mieszaniem kolejności i orientacji */
+function solveMixed(boxes,P,opts={}){
+  const t0=Date.now(),budget=opts.ms??2000;
+  let cur=baseOrder(boxes),curPref=new Map();
+  let curRes=packAll(cur,P,curPref),curC=cost(curRes);
+  let best=curRes,bestC=curC;
+  const N=cur.length;if(N<2)return best;
+  let it=0;
+  while(Date.now()-t0<budget){
+    it++;
+    const n=cur.slice(),pref=new Map(curPref);const k=Math.random();
+    if(k<.45){const a=Math.floor(Math.random()*N),b=Math.floor(Math.random()*N);
+      /* nie mieszaj delikatnych z niedelikatnymi – delikatne zostają na końcu */
+      if(n[a].fragile===n[b].fragile)[n[a],n[b]]=[n[b],n[a]]}
+    else if(k<.8){const j=Math.floor(Math.random()*N);pref.set(n[j].id,Math.floor(Math.random()*6))}
+    else{const a=Math.floor(Math.random()*N);const x=n.splice(a,1)[0];let b=Math.floor(Math.random()*N);n.splice(b,0,x);
+      if(n.some((q,i)=>i>0&&n[i-1].fragile&&!q.fragile)){n.splice(b,1);n.splice(a,0,x)}}
+    const r=packAll(n,P,pref),c=cost(r);
+    const T=(1-(Date.now()-t0)/budget)*2000+1;
+    if(c<=curC||Math.random()<Math.exp((curC-c)/T)){cur=n;curPref=pref;curRes=r;curC=c;if(c<bestC){best=r;bestC=c}}
+  }
+  best.iters=it;return best;
+}
+
+/* Jednakowe kartony: najlepszy wzór warstwy (2D) dla każdej dozwolonej orientacji */
+function layerPattern(L,W,a,b,ms){
+  /* MaxRects bez obrotu globalnego; każdy element może być a×b albo b×a */
+  function run(rotSeq){
+    let F=[{x:0,y:0,l:L,w:W}];const P=[];
+    for(let i=0;;i++){
+      let best=null;const r=rotSeq?rotSeq(i):null;
+      const rots=r===1?[[a,b]]:r===2?[[b,a]]:[[a,b],[b,a]];
+      for(const f of F)for(const[l,w]of rots)if(l<=f.l+1e-9&&w<=f.w+1e-9){const s=f.y*1e4+f.x;if(!best||s<best.s)best={x:f.x,y:f.y,l,w,s}}
+      if(!best)break;
+      const q={x:best.x,y:best.y,l:best.l,w:best.w};P.push(q);const NF=[];
+      for(const f of F){if(q.x>=f.x+f.l||q.x+q.l<=f.x||q.y>=f.y+f.w||q.y+q.w<=f.y){NF.push(f);continue}
+        if(q.x>f.x)NF.push({x:f.x,y:f.y,l:q.x-f.x,w:f.w});if(q.x+q.l<f.x+f.l)NF.push({x:q.x+q.l,y:f.y,l:f.x+f.l-q.x-q.l,w:f.w});
+        if(q.y>f.y)NF.push({x:f.x,y:f.y,l:f.l,w:q.y-f.y});if(q.y+q.w<f.y+f.w)NF.push({x:f.x,y:q.y+q.w,l:f.l,w:f.y+f.w-q.y-q.w})}
+      F=NF.filter((x,i)=>!NF.some((y,j)=>j!==i&&y.x<=x.x&&y.y<=x.y&&y.x+y.l>=x.x+x.l&&y.y+y.w>=x.y+x.w&&(j<i||!(x.x===y.x&&x.y===y.y&&x.l===y.l&&x.w===y.w))));
+      if(P.length>2000)break;
+    }
+    return P;
+  }
+  /* wzór blokowy: kolumny w jednej orientacji + reszta w drugiej (klasyczny układ „cegiełkowy”) */
+  function block(){
+    let best=[];
+    for(const[l1,w1,l2,w2]of[[a,b,b,a],[b,a,a,b]]){
+      for(let k=0;k*l1<=L+1e-9;k++){
+        const P=[];const ny1=Math.floor(W/w1+1e-9);
+        for(let i=0;i<k;i++)for(let j=0;j<ny1;j++)P.push({x:i*l1,y:j*w1,l:l1,w:w1});
+        const x0=k*l1,nx2=Math.floor((L-x0)/l2+1e-9),ny2=Math.floor(W/w2+1e-9);
+        for(let i=0;i<nx2;i++)for(let j=0;j<ny2;j++)P.push({x:x0+i*l2,y:j*w2,l:l2,w:w2});
+        if(P.length>best.length)best=P;
+      }
+    }
+    return best;
+  }
+  let best=block();
+  const t0=Date.now();
+  for(const fixed of[1,2,null]){const r=run(()=>fixed);if(r.length>best.length)best=r}
+  while(Date.now()-t0<ms){const seq=[];const r=run(i=>seq[i]??(seq[i]=Math.random()<.5?1:2));if(r.length>best.length)best=r}
+  return best;
+}
+
+function solveUniform(box,qty,P,opts={}){
+  const os=orients(box);let bestCfg=null;
+  const per=Math.max(80,(opts.ms??1200)/os.length);
+  for(const [l,w,h] of os){
+    if(!(l>0&&w>0&&h>0))continue;
+    const pat=layerPattern(P.L+2*P.over,P.W+2*P.over,l,w,per).map(q=>({...q,x:q.x-P.over,y:q.y-P.over}))
+      .filter(q=>{const cx=q.x+q.l/2,cy=q.y+q.w/2;return cx>=0&&cy>=0&&cx<=P.L&&cy<=P.W});
+    if(!pat.length)continue;
+    const byH=Math.floor(P.H/h+1e-9);
+    const byKg=P.maxKg&&box.kg?Math.floor(P.maxKg/box.kg+1e-9):Infinity;
+    let layers=byH,perPal=Math.min(layers*pat.length,byKg);
+    if(box.fragile){layers=Math.min(layers,1);perPal=Math.min(pat.length,byKg)}
+    const cfg={l,w,h,pat,layers:Math.ceil(perPal/pat.length),perPal};
+    if(!bestCfg||cfg.perPal>bestCfg.perPal||(cfg.perPal===bestCfg.perPal&&h<bestCfg.h))bestCfg=cfg;
+  }
+  if(!bestCfg||!bestCfg.perPal)return {pallets:[],unplaceable:Array.from({length:qty},(_, i)=>({...box,id:'u'+i})),pattern:null};
+  const pallets=[];let left=qty,id=0;
+  while(left>0&&pallets.length<500){
+    const placed=[];let n=Math.min(left,bestCfg.perPal);let kg=0;
+    for(let k=0;n>0;k++){
+      /* co druga warstwa obrócona o 180° – wiązanie warstw */
+      const mir=k%2===1;
+      for(const q of bestCfg.pat){if(n<=0)break;
+        const x=mir?(P.L-(q.x+q.l)):q.x,y=mir?(P.W-(q.y+q.w)):q.y;
+        placed.push({...box,id:'u'+(id++),x,y,z:k*bestCfg.h,l:q.l,w:q.w,h:bestCfg.h});n--;kg+=box.kg}
+    }
+    left-=placed.length;pallets.push({placed,rest:[],kg});
+  }
+  return {pallets,unplaceable:[],pattern:{perLayer:bestCfg.pat.length,layers:bestCfg.layers,perPal:bestCfg.perPal,o:[bestCfg.l,bestCfg.w,bestCfg.h]}};
+}
+
+root.PalletEngine={solveMixed,solveUniform,topOf,orients};
+if(typeof module!=='undefined')module.exports=root.PalletEngine;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+<script>
+const COLORS=[['#f7a43a','#3a2710'],['#62b4f7','#0f2c47'],['#ab9df7','#2a2350'],['#ff8f8f','#4a1d22'],['#5fd6a7','#0f3a2d'],['#f293c6','#431f39'],['#a8d862','#283a12'],['#c5cad2','#2c3139'],['#ffd166','#3d3008'],['#7ee0e6','#0f3538']];
+const LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const densV=()=>Math.max(0,+$('dens').value||0);
+const estKg=it=>{const l=+it.l,w=+it.w,h=+it.h;return l>0&&w>0&&h>0&&h<=5?Math.round(l*w*h/1e6*densV()*10)/10:0};
+const kgOf=it=>(+it.kg>0)?+it.kg:estKg(it);
+const PALS={eur:[120,80,14.4,25],ind:[120,100,14.4,30],half:[80,60,14.4,12]};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Math.round(n).toLocaleString('pl-PL');
+const r1=n=>Math.round(n*10)/10;
+const emptyItem=()=>({n:'',l:'',w:'',h:'',kg:'',q:1,fragile:false,side:false});
+let items=[emptyItem()],uni={n:'Karton',l:'',w:'',h:'',kg:'',q:'',fragile:false,side:false};
+let mode='mixed',result=null,curPal=0,running=false;
+let db=null,myId='',myName='',multi=false,companies=[],cid=null,subs=[],savedDocs=[],currentPlanId=null,currentPlanName='',fleet=[];
+function renderVeh(){}
+
+/* ---------- KROKI ---------- */
+function setStep(n){document.querySelectorAll('.step').forEach(s=>{const k=+s.dataset.step;s.classList.toggle('on',k===n);s.classList.toggle('done',k<n)})}
+document.querySelectorAll('.step').forEach(s=>s.onclick=()=>{const el=$(s.dataset.go);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
+
+/* ---------- PALETA ---------- */
+function palParams(){const L=+$('palL').value,W=+$('palW').value,ph=+$('palH').value||0;
+return{L,W,H:Math.max(0,(+$('maxH').value||0)-ph),maxKg:Math.max(0,(+$('maxKg').value||0)-(+$('palKg').value||0)),over:Math.max(0,+$('over').value||0),support:Math.min(1,Math.max(.5,(+$('sup').value||75)/100)),heavyDown:$('heavy').checked,ph,pkg:+$('palKg').value||0,type:$('palType').value,dens:densV(),maxH:+$('maxH').value||0,maxKgT:+$('maxKg').value||0}}
+function palHint(){const p=palParams();$('palHint').textContent=`${p.L}×${p.W} · do ${p.maxH} cm · ${fmt(p.maxKgT)} kg`}
+$('densSel').onchange=e=>{if(e.target.value!=='own')$('dens').value=e.target.value;renderItems()};$('dens').addEventListener('input',()=>{$('densSel').value=['650','750','850','500'].includes($('dens').value)?$('dens').value:'own';hint();document.querySelectorAll('.pal').forEach(row=>{const it=itemOf(row),inp=row.querySelector('[data-k=kg]');if(inp)inp.placeholder=estKg(it)?'≈ '+estKg(it):''})});
+$('palType').onchange=e=>{const t=PALS[e.target.value];if(t){$('palL').value=t[0];$('palW').value=t[1];$('palH').value=t[2];$('palKg').value=t[3]}palHint();setStep(1)};
+['palL','palW','maxH','maxKg','palH','palKg','over','sup'].forEach(id=>$(id).addEventListener('input',()=>{if(['palL','palW'].includes(id))$('palType').value='own';palHint()}));
+
+/* ---------- PACZKI ---------- */
+const boxIco=c=>`<svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true"><path d="M4 10l16-7 16 7-16 7z" fill="${c[0]}"/><path d="M4 10v14l16 8V17z" fill="${c[0]}" opacity=".75"/><path d="M36 10v14l-16 8V17z" fill="${c[0]}" opacity=".55"/></svg>`;
+function itemCard(it,i,isUni){const c=COLORS[i%COLORS.length];return`<div class="pal" data-i="${isUni?'u':i}">
+<div class="ico" style="background:${c[1]};border-color:${c[0]}">${boxIco(c)}</div>
+<div><div class="hd"><input class="nm" data-k="n" value="${esc(it.n)}" placeholder="${isUni?'Karton':'Element '+(LETTERS[i]||i+1)+' (np. Szafka 60 – bok)'}" aria-label="Nazwa">${isUni?'':`<button class="del" data-rm="${i}" aria-label="Usuń element">×</button>`}</div>
+<div class="f4"><div><label class="lbl">Dł. (cm)</label><input type="number" min="1" inputmode="decimal" data-k="l" value="${it.l}"></div>
+<div><label class="lbl">Szer. (cm)</label><input type="number" min="1" inputmode="decimal" data-k="w" value="${it.w}"></div>
+<div><label class="lbl">${isUni?'Wys.':'Grubość / wys.'} (cm)</label><input type="number" min="1" inputmode="decimal" data-k="h" value="${it.h}"></div></div>
+<div class="f2"><div style="width:96px"><label class="lbl">Waga (kg/szt.)</label><input type="number" min="0" inputmode="decimal" data-k="kg" value="${it.kg}" placeholder="${estKg(it)?'≈ '+estKg(it):'auto'}"></div>
+<div><label class="lbl">Ilość</label><span class="qty"><button data-d="-1" aria-label="Mniej">−</button><input type="number" min="1" inputmode="numeric" data-k="q" value="${it.q}" placeholder="${isUni?'max':''}"><button data-d="1" aria-label="Więcej">+</button></span></div></div>
+<div class="f2" style="margin-top:6px"><label class="tog"><input type="checkbox" data-k="fragile" ${it.fragile?'checked':''}>Delikatna – nic na niej</label><label class="tog"><input type="checkbox" data-k="side" ${it.side?'checked':''}>Może leżeć na boku</label></div></div></div>`}
+function renderItems(){if(mode==='uni'){$('items').innerHTML=itemCard(uni,0,true);$('addItem').hidden=true;$('uniInfo').hidden=false}
+else{$('items').innerHTML=items.map((it,i)=>itemCard(it,i,false)).join('')||'<p class="muted" style="margin:0 0 10px">Dodaj pierwszą paczkę.</p>';$('addItem').hidden=false;$('uniInfo').hidden=true}hint()}
+function hint(){if(mode==='uni'){$('itHint').textContent=uni.q?uni.q+' szt.':'ile się zmieści';return}const n=items.reduce((a,b)=>a+(+b.q||0),0),kg=items.reduce((a,b)=>a+(+b.q||0)*kgOf(b),0);$('itHint').textContent=n+' szt. · '+fmt(kg)+' kg'}
+const itemOf=row=>row.dataset.i==='u'?uni:items[+row.dataset.i];
+$('items').addEventListener('input',e=>{const row=e.target.closest('.pal');if(!row)return;const it=itemOf(row),k=e.target.dataset.k;if(!k)return;
+if(k==='fragile'||k==='side')it[k]=e.target.checked;else if(k==='n')it.n=e.target.value;else it[k]=e.target.value===''?'':+e.target.value;if(['l','w','h'].includes(k)){const inp=row.querySelector('[data-k=kg]');if(inp)inp.placeholder=estKg(it)?'≈ '+estKg(it):(+it.h>5?'wpisz':'auto')}hint();setStep(2)});
+$('items').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){items.splice(+rm.dataset.rm,1);renderItems();return}
+const d=e.target.closest('[data-d]');if(d){const row=d.closest('.pal');const it=itemOf(row);it.q=Math.max(1,(+it.q||0)+(+d.dataset.d));row.querySelector('[data-k=q]').value=it.q;hint()}});
+$('addItem').onclick=()=>{items.push(emptyItem());renderItems();const rows=$('items').querySelectorAll('.pal');const row=rows[rows.length-1];if(row){row.scrollIntoView({block:'nearest'});row.querySelector('[data-k=l]').focus()}};
+function setMode(m){mode=m;document.querySelectorAll('#mSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$('goTxt').textContent=m==='uni'?'Policz kartony na palecie':'Ułóż na palecie';renderItems()}
+document.querySelectorAll('#mSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+
+/* ---------- IMPORT EXCEL / CSV ---------- */
+async function unzip(buf){const u=new Uint8Array(buf),dv=new DataView(buf);let e=u.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('To nie jest plik .xlsx');
+const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const files={};
+for(let i=0;i<n;i++){const meth=dv.getUint16(p+10,true),csz=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),off=dv.getUint32(p+42,true);
+const name=new TextDecoder().decode(u.subarray(p+46,p+46+nl));const lnl=dv.getUint16(off+26,true),lxl=dv.getUint16(off+28,true);const data=u.subarray(off+30+lnl+lxl,off+30+lnl+lxl+csz);files[name]={meth,data};p+=46+nl+xl+cl}
+const get=async name=>{const f=files[name];if(!f)return null;if(f.meth===0)return new TextDecoder().decode(f.data);const ds=new DecompressionStream('deflate-raw');const out=await new Response(new Blob([f.data]).stream().pipeThrough(ds)).arrayBuffer();return new TextDecoder().decode(out)};
+return{names:Object.keys(files),get}}
+const xml=s=>new DOMParser().parseFromString(s,'application/xml');
+async function readXlsx(buf){const z=await unzip(buf);const ss=[];const sst=await z.get('xl/sharedStrings.xml');
+if(sst)xml(sst).querySelectorAll('si').forEach(si=>ss.push([...si.getElementsByTagName('t')].map(t=>t.textContent).join('')));
+const wb=xml(await z.get('xl/workbook.xml'));const rels=xml(await z.get('xl/_rels/workbook.xml.rels'));const rmap={};rels.querySelectorAll('Relationship').forEach(r=>rmap[r.getAttribute('Id')]=r.getAttribute('Target'));
+const sheets=[...wb.getElementsByTagName('sheet')].map(s=>{const rid=s.getAttribute('r:id')||s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id');let t=rmap[rid]||'';t=t.replace(/^\/?xl\//,'');return{name:s.getAttribute('name'),path:'xl/'+t}});
+const out=[];for(const sh of sheets){const x=await z.get(sh.path);if(!x)continue;const d=xml(x);const rows=[];
+d.querySelectorAll('sheetData row').forEach(r=>{const row=[];r.querySelectorAll('c').forEach(c=>{const ref=c.getAttribute('r')||'';const col=ref.replace(/\d+/g,'').split('').reduce((a,ch)=>a*26+ch.charCodeAt(0)-64,0)-1;const t=c.getAttribute('t');const v=c.getElementsByTagName('v')[0];let val='';
+if(t==='s'&&v)val=ss[+v.textContent]??'';else if(t==='inlineStr'){val=[...c.getElementsByTagName('t')].map(q=>q.textContent).join('')}else if(v)val=v.textContent;row[col<0?row.length:col]=val});rows.push(row)});out.push({name:sh.name,rows})}return out}
+function readCsv(text){const sep=(text.split('\n')[0].match(/;/g)||[]).length>(text.split('\n')[0].match(/,/g)||[]).length?';':',';return[{name:'CSV',rows:text.split(/\r?\n/).filter(Boolean).map(l=>l.split(sep).map(s=>s.replace(/^"|"$/g,'').trim()))}]}
+const E_=String.raw`(?=$|[\s(\[.,:/_-])`;
+const HDR={n:/^(nazwa|opis|element|mebel|produkt|towar|nazwa produktu|nazwa paczki)/i,sym:/^(symbol|kod|indeks)/i,
+len:new RegExp('^(d[łl]ugo[śs][ćc]|d[łl]\\.?|dl|length|l)'+E_,'i'),wid:new RegExp('^(szeroko[śs][ćc]|szer\\.?|width|w)'+E_,'i'),
+dep:new RegExp('^(g[łl][ęe]boko[śs][ćc]|g[łl][ęe]b\\.?|depth|d)'+E_,'i'),hei:new RegExp('^(wysoko[śs][ćc]|wys\\.?|grubo[śs][ćc]|grub\\.?|height|h)'+E_,'i'),
+kg:/^(waga|masa|kg|ci[ęe][żz]ar|weight)/i,q:/^(ilo[śs][ćc]|szt|sztuk|qty|liczba)/i};
+const xlDate=v=>{const n=parseFloat(v);if(n>20000&&n<80000){const d=new Date(Date.UTC(1899,11,30)+n*864e5);return d.toISOString().slice(0,10)}const m=String(v).match(/(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;const m2=String(v).match(/(\d{4})-(\d{2})-(\d{2})/);return m2?m2[0]:''};
+function sheetMeta(sh){const out={};const R=sh.rows;const next=(r,c)=>{for(let j=c+1;j<Math.min((R[r]||[]).length,c+30);j++){const v=R[r][j];if(v!==undefined&&String(v).trim()!=='')return String(v).trim()}const below=(R[r+1]||[])[c];return below!==undefined&&String(below).trim()!==''?String(below).trim():''};
+for(let r=0;r<Math.min(R.length,30);r++)(R[r]||[]).forEach((v,c)=>{const t=String(v??'').trim();if(!t)return;
+if(!out.due&&/^(termin|data realizacji|termin realizacji|data dostawy)/i.test(t)){const x=next(r,c);const d=xlDate(x);if(d)out.due=d}
+if(!out.ord&&/^(nr|numer)\s*(zam|zlec)|^zam[óo]wienie\s*(nr|numer)|^nr\.?\s*$/i.test(t)){const x=next(r,c);if(x&&x.length<40)out.ord=x}});return out}
+function mapSheet(sh){for(let r=0;r<Math.min(sh.rows.length,40);r++){const row=(sh.rows[r]||[]).map(x=>String(x??'').trim());const m={};
+row.forEach((c,i)=>{for(const k in HDR)if(m[k]===undefined&&HDR[k].test(c))m[k]=i});
+let A,B;if(m.len!==undefined&&m.wid!==undefined){A='len';B='wid'}else if(m.wid!==undefined&&m.dep!==undefined){A='wid';B='dep'}else if(m.len!==undefined&&m.dep!==undefined){A='len';B='dep'}
+if(!A||m.hei===undefined)continue;
+const out=[];for(let j=r+1;j<sh.rows.length;j++){const x=sh.rows[j]||[];const num=k=>m[k]===undefined?NaN:parseFloat(String(x[m[k]]??'').replace(',','.'));
+const l=num(A),w=num(B),h=num('hei');if(!(l>0&&w>0&&h>0))continue;
+const nm=[m.sym!==undefined?String(x[m.sym]??'').trim():'',m.n!==undefined?String(x[m.n]??'').trim():''].filter(Boolean).join(' – ');
+out.push({n:nm,l,w,h,kg:num('kg')>0?num('kg'):'',q:num('q')>0?Math.round(num('q')):1,fragile:false,side:false})}
+if(out.length)return{sheet:sh.name,rows:out,meta:sheetMeta(sh)}}return null}
+function loadSheetJS(){return new Promise((res,rej)=>{if(window.XLSX)return res(window.XLSX);const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>res(window.XLSX);s.onerror=()=>rej(new Error('Brak biblioteki .xls'));document.head.appendChild(s)})}
+async function readXls(buf){const X=await loadSheetJS();const wb=X.read(new Uint8Array(buf),{type:'array'});return wb.SheetNames.map(n=>({name:n,rows:X.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''})}))}
+async function importFile(f){const box=$('impMsg');box.innerHTML='<p class="msg info">Wczytuję plik…</p>';
+try{let sheets;if(/\.csv$/i.test(f.name))sheets=readCsv(await f.text());else if(/\.xls$/i.test(f.name))sheets=await readXls(await f.arrayBuffer());else{const buf=await f.arrayBuffer();try{sheets=await readXlsx(buf)}catch(e){sheets=await readXls(buf)}}
+const pr=n=>/^zam/i.test(n)?3:/pacz|pack/i.test(n)?2:/rozkr|optym/i.test(n)?0:1;const ranked=[...sheets].sort((a,b)=>pr(b.name)-pr(a.name));let got=null;for(const sh of ranked){got=mapSheet(sh);if(got&&got.rows.length)break}
+if(!got||!got.rows.length){box.innerHTML='<p class="msg err">Nie znalazłem w pliku kolumn z wymiarami (długość, szerokość, wysokość). Podeślij przykładowy plik – dopasuję import do Waszego formatu.</p>';return}
+const dims=got.rows.flatMap(r=>[r.l,r.w,r.h]).sort((a,b)=>a-b);const med=dims[Math.floor(dims.length/2)];const mm=med>300;
+const conv=got.rows.map(r=>mm?{...r,l:r1(r.l/10),w:r1(r.w/10),h:r1(r.h/10)}:r);
+setMode('mixed');items=conv;renderItems();setStep(2);const mt=got.meta||{};if(mt.ord&&!$('ordNo').value)$('ordNo').value=mt.ord;if(mt.due&&!$('ordDate').value)$('ordDate').value=mt.due;
+const noKg=conv.filter(r=>!(+r.kg>0)&&r.h>5).length;box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${conv.length}</b> pozycji z arkusza „${esc(got.sheet)}”${mm?' (wymiary przeliczone z mm na cm)':''}${(got.meta||{}).ord?' · zamówienie '+esc(got.meta.ord):''}${(got.meta||{}).due?' · termin '+esc(got.meta.due):''}.${noKg?` <b style="color:var(--warn)">${noKg} poz. bez wagi</b> – wpisz ją, żeby pilnować limitu wagi palety.`:''} Zaznacz meble delikatne.</p>`}
+catch(e){console.error(e);box.innerHTML='<p class="msg err">Nie udało się odczytać pliku. Zapisz go jako .xlsx albo .csv i spróbuj ponownie.</p>'}}
+$('drop').onclick=()=>$('file').click();$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};
+$('file').onchange=e=>{const f=e.target.files[0];if(f)importFile(f);e.target.value=''};
+['dragenter','dragover'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.add('on')}));
+['dragleave','drop'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.remove('on')}));
+$('drop').addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)importFile(f)});
+
+/* ---------- LICZENIE ---------- */
+function msg(html,cls='err'){$('msgs').innerHTML=html?`<p class="msg ${cls}">${html}</p>`:''}
+async function calculate(){if(running)return;msg('');const P=palParams();
+if(!(P.L>0&&P.W>0)){msg('Podaj wymiary palety.');return}if(!(P.H>0)){msg('Maks. wysokość musi być większa niż wysokość palety.');return}
+running=true;$('go').disabled=true;const lbl=$('goTxt').textContent;$('goTxt').textContent='Układam…';$('prog').hidden=false;const bar=$('prog').firstElementChild;bar.style.width='30%';
+await new Promise(r=>setTimeout(r,30));
+try{let res,src;
+if(mode==='uni'){const it=uni;const l=+it.l,w=+it.w,h=+it.h;if(!(l>0&&w>0&&h>0)){msg('Uzupełnij wymiary kartonu.');return}
+const qty=+it.q>0?Math.round(+it.q):0;const box={id:'u',g:0,n:it.n||'Karton',l,w,h,kg:kgOf(it),fragile:!!it.fragile,side:!!it.side};
+res=PalletEngine.solveUniform(box,qty||1e6,P,{ms:1200});if(!qty&&res.pallets.length)res.pallets=[res.pallets[0]];src=[{...it,q:qty||(res.pattern?res.pattern.perPal:0)}]}
+else{const boxes=[];for(let i=0;i<items.length;i++){const it=items[i];const l=+it.l,w=+it.w,h=+it.h,q=Math.round(+it.q||0);
+if(!(l>0&&w>0&&h>0&&q>0)){msg(`Uzupełnij wymiary i ilość elementu ${esc(it.n||LETTERS[i]||i+1)}.`);return}
+const nm=it.n||'Element '+(LETTERS[i]||i+1),kg1=kgOf(it);
+if(h<=5&&!it.side&&!it.fragile&&q>1){const maxPer=Math.max(1,Math.floor(P.H/h+1e-9));const ns=Math.ceil(q/maxPer);let left=q;
+for(let s2=0;s2<ns;s2++){const c=Math.ceil(left/(ns-s2));left-=c;boxes.push({id:i+'_s'+s2,g:i,n:nm,l,w,h:r1(h*c*1000)/1000,kg:kg1*c,cnt:c,ph:h,fragile:false,side:false})}}
+else for(let k=0;k<q;k++)boxes.push({id:i+'_'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,fragile:!!it.fragile,side:!!it.side})}
+if(!boxes.length){msg('Dodaj przynajmniej jeden element.');return}if(boxes.length>400){msg('Maksymalnie 400 elementów w jednym planie.');return}
+const ms=Math.min(4000,1200+boxes.length*25);const t0=Date.now();const tick=setInterval(()=>bar.style.width=Math.min(95,(Date.now()-t0)/ms*100)+'%',100);
+await new Promise(r=>setTimeout(r,20));res=PalletEngine.solveMixed(boxes,P,{ms});clearInterval(tick);src=items.map(x=>({...x}))}
+result={mode,P,items:src,pallets:res.pallets.map(p=>({kg:p.kg,placed:p.placed.map(b=>({x:b.x,y:b.y,z:b.z,l:b.l,w:b.w,h:b.h,g:b.g,kg:b.kg,f:b.fragile?1:0,n:b.n,c:b.cnt||1,ph:b.ph||0}))})),
+unplaceable:(res.unplaceable||[]).map(b=>({n:b.n,l:b.l,w:b.w,h:b.h,c:b.cnt||1})),pattern:res.pattern||null,ord:$('ordNo').value.trim(),due:$('ordDate').value,at:new Date().toISOString()};
+if(!result.pallets.length){msg(result.unplaceable.length?'Żadna paczka nie mieści się na tej palecie (za duża, za wysoka albo za ciężka).':'Nie udało się ułożyć paczek.');return}
+curPal=0;currentPlanId=null;currentPlanName='';showResult();setStep(3);if(window.innerWidth<1000)$('secRes').scrollIntoView({behavior:'smooth',block:'start'})}
+finally{running=false;$('go').disabled=false;$('goTxt').textContent=lbl;$('prog').hidden=true}}
+$('go').onclick=calculate;
+
+/* ---------- WIDOK 3D (canvas, bez bibliotek) ---------- */
+let yaw=-0.75,pitch=0.62;const DEF=[-0.75,0.62];
+function draw3D(cv,r,pi,opts={}){const ctx=cv.getContext('2d');const P=r.P,pl=r.pallets[pi];const light=!!opts.light;
+const Wd=cv.width,Hd=cv.height;ctx.clearRect(0,0,Wd,Hd);if(light){ctx.fillStyle='#fff';ctx.fillRect(0,0,Wd,Hd)}
+const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+const cx0=P.L/2,cy0=P.W/2;const ph=Math.max(6,P.ph||0);
+const prj=(x,y,z)=>{x-=cx0;y-=cy0;const x1=x*cy-y*sy,y1=x*sy+y*cy;return[x1,-(z*cp+y1*sp),y1*cp-z*sp]};
+const d=[sy*cp,cy*cp,-sp];
+const top=PalletEngine.topOf(pl);const Hmax=Math.max(P.H,top);
+const ext=[];for(const x of[-P.over,P.L+P.over])for(const y of[-P.over,P.W+P.over])for(const z of[-ph,Hmax])ext.push(prj(x,y,z));
+const minX=Math.min(...ext.map(p=>p[0])),maxX=Math.max(...ext.map(p=>p[0])),minY=Math.min(...ext.map(p=>p[1])),maxY=Math.max(...ext.map(p=>p[1]));
+const sc=Math.min((Wd-60)/(maxX-minX),(Hd-60)/(maxY-minY));const ox=Wd/2-(minX+maxX)/2*sc,oy=Hd/2-(minY+maxY)/2*sc;
+const S=(x,y,z)=>{const p=prj(x,y,z);return[ox+p[0]*sc,oy+p[1]*sc]};
+const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);const c=[n>>16,n>>8&255,n&255].map(v=>Math.round(Math.min(255,v*f)));return`rgb(${c[0]},${c[1]},${c[2]})`};
+function boxFaces(b,col,edge,alpha){const x0=b.x,x1=b.x+b.l,y0=b.y,y1=b.y+b.w,z0=b.z,z1=b.z+b.h;
+const F=[[[0,0,-1],[[x0,y0,z0],[x1,y0,z0],[x1,y1,z0],[x0,y1,z0]],.5],[[0,0,1],[[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],1.1],[[-1,0,0],[[x0,y0,z0],[x0,y1,z0],[x0,y1,z1],[x0,y0,z1]],.78],[[1,0,0],[[x1,y0,z0],[x1,y1,z0],[x1,y1,z1],[x1,y0,z1]],.78],[[0,-1,0],[[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],.92],[[0,1,0],[[x0,y1,z0],[x1,y1,z0],[x1,y1,z1],[x0,y1,z1]],.92]];
+for(const[n,pts,f]of F){if(n[0]*d[0]+n[1]*d[1]+n[2]*d[2]>=0)continue;ctx.beginPath();pts.forEach((p,i)=>{const s=S(...p);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])});ctx.closePath();
+ctx.globalAlpha=alpha??1;ctx.fillStyle=shade(col,f);ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle=edge;ctx.lineWidth=1.2;ctx.stroke()}}
+/* paleta */
+const pal={x:0,y:0,z:-ph,l:P.L,w:P.W,h:ph};boxFaces(pal,'#b07a3c',light?'#5a3a14':'#6b4518');
+/* limit wysokości – rama */
+ctx.setLineDash([6,5]);ctx.strokeStyle=light?'#999':'rgba(255,191,94,.55)';ctx.lineWidth=1.2;ctx.beginPath();[[0,0],[P.L,0],[P.L,P.W],[0,P.W],[0,0]].forEach((q,i)=>{const s=S(q[0],q[1],P.H);i?ctx.lineTo(s[0],s[1]):ctx.moveTo(s[0],s[1])});ctx.stroke();ctx.setLineDash([]);
+/* kolejność rysowania – sortowanie topologiczne (separacja na osiach) */
+const B=pl.placed.map((b,i)=>({...b,i}));const n=B.length;const before=Array.from({length:n},()=>[]);const indeg=new Array(n).fill(0);
+for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const A=B[a],C=B[b];let far=-1;
+const ax=[[A.x,A.x+A.l,C.x,C.x+C.l,d[0]],[A.y,A.y+A.w,C.y,C.y+C.w,d[1]],[A.z,A.z+A.h,C.z,C.z+C.h,d[2]]];
+for(const[a0,a1,c0,c1,dk]of ax){if(Math.abs(dk)<1e-9)continue;if(a1<=c0+1e-9){far=dk>0?b:a;break}if(c1<=a0+1e-9){far=dk>0?a:b;break}}
+if(far<0)continue;const near=far===a?b:a;before[far].push(near);indeg[near]++}
+const q=[];for(let i=0;i<n;i++)if(!indeg[i])q.push(i);const ord=[];
+while(q.length){q.sort((i,j)=>{const ci=prj(B[i].x+B[i].l/2,B[i].y+B[i].w/2,B[i].z+B[i].h/2)[2],cj=prj(B[j].x+B[j].l/2,B[j].y+B[j].w/2,B[j].z+B[j].h/2)[2];return cj-ci});const k=q.shift();ord.push(k);for(const m of before[k])if(!--indeg[m])q.push(m)}
+if(ord.length<n)for(let i=0;i<n;i++)if(!ord.includes(i))ord.push(i);
+const numOf=orderNumbers(pl);
+for(const k of ord){const b=B[k];const c=COLORS[b.g%COLORS.length];boxFaces(b,c[0],light?'#333':'rgba(10,15,25,.85)');
+if(b.c>1&&b.ph){ctx.strokeStyle=light?'rgba(0,0,0,.35)':'rgba(10,15,25,.45)';ctx.lineWidth=.8;const vis=[[d[0]<0,[[b.x+b.l,b.y],[b.x+b.l,b.y+b.w]]],[d[0]>0,[[b.x,b.y],[b.x,b.y+b.w]]],[d[1]<0,[[b.x,b.y+b.w],[b.x+b.l,b.y+b.w]]],[d[1]>0,[[b.x,b.y],[b.x+b.l,b.y]]]];
+for(let j=1;j<b.c;j++){const z=b.z+j*b.ph;for(const[v,seg]of vis){if(!v)continue;const a1=S(seg[0][0],seg[0][1],z),a2=S(seg[1][0],seg[1][1],z);ctx.beginPath();ctx.moveTo(a1[0],a1[1]);ctx.lineTo(a2[0],a2[1]);ctx.stroke()}}}
+const s=S(b.x+b.l/2,b.y+b.w/2,b.z+b.h);const fs=Math.max(10,Math.min(18,Math.min(b.l,b.w)*sc/3.2));if(Math.min(b.l,b.w)*sc>16){ctx.font=`800 ${fs}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#111';ctx.fillText(numOf[b.i],s[0],s[1])}}
+/* wymiary */
+if(light){ctx.fillStyle='#333';ctx.font='600 22px system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='top';
+ctx.fillText(`Wysokość z paletą: ${r1(top+(P.ph||0))} cm  ·  Waga z paletą: ${fmt(pl.kg+(P.pkg||0))} kg`,16,14)}}
+function orderNumbers(pl){const idx=pl.placed.map((b,i)=>i).sort((a,b)=>{const A=pl.placed[a],B=pl.placed[b];return A.z-B.z||A.x-B.x||A.y-B.y});const m={};idx.forEach((i,k)=>m[i]=k+1);return m}
+const cv=$('cv');let drag=null;
+cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw,pitch};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+cv.addEventListener('pointermove',e=>{if(!drag||!result)return;yaw=drag.yaw-(e.clientX-drag.x)*0.01;pitch=Math.max(0.12,Math.min(1.45,drag.pitch+(e.clientY-drag.y)*0.006));draw3D(cv,result,curPal)});
+const endDrag=()=>{drag=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
+$('rotL').onclick=()=>{yaw+=Math.PI/4;if(result)draw3D(cv,result,curPal)};$('rotR').onclick=()=>{yaw-=Math.PI/4;if(result)draw3D(cv,result,curPal)};
+$('rotReset').onclick=()=>{[yaw,pitch]=DEF;if(result)draw3D(cv,result,curPal)};
+
+/* ---------- WARSTWY 2D ---------- */
+function levelSvg(r,pl,z,numOf){const P=r.P;const sc=Math.min(300/(P.L+2*P.over),3);const pad=6;const W=(P.L+2*P.over)*sc+pad*2,H=(P.W+2*P.over)*sc+pad*2;const o=P.over;
+let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${Math.max(320,W)}px;display:block;margin:6px auto" role="img" aria-label="Warstwa od ${r1(z)} cm">`;
+s+=`<rect x="${pad+o*sc}" y="${pad+o*sc}" width="${P.L*sc}" height="${P.W*sc}" fill="rgba(176,122,60,.25)" stroke="#b07a3c" stroke-width="1.5"/>`;
+pl.placed.forEach((b,i)=>{if(Math.abs(b.z-z)>1e-6)return;const c=COLORS[b.g%COLORS.length];const x=pad+(b.x+o)*sc,y=pad+(b.y+o)*sc,w=b.l*sc,h=b.w*sc;
+s+=`<rect x="${x+1}" y="${y+1}" width="${Math.max(1,w-2)}" height="${Math.max(1,h-2)}" rx="3" fill="${c[0]}" stroke="#111" stroke-width="1"/>`;
+const fs=Math.max(10,Math.min(16,Math.min(w,h)/3));s+=`<text x="${x+w/2}" y="${y+h/2+fs/3}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="#111">${numOf[i]}</text>`});
+return s+'</svg>'}
+
+/* ---------- WYNIK ---------- */
+function showResult(){const r=result;if(!r)return;$('emptyRes').hidden=true;$('resBox').hidden=false;const P=r.P;const np=r.pallets.length;
+const cntOf=b=>b.c||1;const tot=r.pallets.reduce((a,p)=>a+p.placed.reduce((x,b)=>x+cntOf(b),0),0),kg=r.pallets.reduce((a,p)=>a+p.kg,0);const un=r.unplaceable.reduce((a,b)=>a+cntOf(b),0);
+const pl=r.pallets[curPal];const top=PalletEngine.topOf(pl);const vol=pl.placed.reduce((a,b)=>a+b.l*b.w*b.h,0);const fill=Math.round(vol/(P.L*P.W*Math.max(top,1))*100);
+const head=r.mode==='uni'&&r.pattern?`${r.pattern.perLayer} szt. na warstwę × ${r.pattern.layers} warstw = <b>${r.pattern.perPal} szt. na paletę</b>`:'';
+$('recCard').className='rec'+(un?' bad':'');
+$('recCard').innerHTML=`<div class="bar"><span class="ck"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5">${un?'<path d="M6 6l12 12M18 6L6 18"/>':'<path d="M5 12l5 5 9-10"/>'}</svg></span>${un?`${un} szt. nie mieści się na palecie`:np===1?'Wszystko mieści się na jednej palecie':`Potrzebne palety: ${np}`}</div>
+<div style="padding:14px"><div class="kpi"><div><span>Palety</span><b>${np}</b></div><div><span>Elementy</span><b>${tot}${un?' / '+(tot+un):''}</b></div><div><span>Waga łącznie</span><b>${fmt(kg)} kg</b></div><div><span>Paleta ${curPal+1}: wysokość</span><b>${r1(top+P.ph)} cm</b></div></div>
+${head?`<p style="margin:10px 0 0;font-size:14px">${head}</p>`:''}
+<p class="muted" style="margin:8px 0 0">Paleta ${curPal+1}: ${pl.placed.reduce((x,b)=>x+cntOf(b),0)} szt. · ${fmt(pl.kg+P.pkg)} kg z paletą · wypełnienie bryły ${fill}% · limit ${P.maxH} cm / ${fmt(P.maxKgT)} kg</p>
+${un?`<p class="msg err" style="margin:10px 0 0">Nie mieszczą się: ${r.unplaceable.slice(0,6).map(b=>`${esc(b.n)} (${b.l}×${b.w}×${b.h})`).join(', ')}${un>6?'…':''}. Za duże na tę paletę albo przekraczają limit wysokości.</p>`:''}</div>`;
+$('ptabs').innerHTML=np>1?r.pallets.map((p,i)=>`<button data-p="${i}" class="${i===curPal?'on':''}">Paleta ${i+1} · ${p.placed.reduce((x,b)=>x+(b.c||1),0)} szt.</button>`).join(''):'';
+draw3D(cv,r,curPal);
+const numOf=orderNumbers(pl);const zs=[...new Set(pl.placed.map(b=>r1(b.z)))].sort((a,b)=>a-b);$('lvHint').textContent=zs.length+' poziomów';
+$('levels').innerHTML=zs.map((z,k)=>{const cnt=pl.placed.filter(b=>Math.abs(r1(b.z)-z)<1e-6).reduce((x,b)=>x+(b.c||1),0);return`<details class="lv" ${k<2?'open':''}><summary>Poziom ${k+1} <span>· od ${z} cm · ${cnt} szt.</span></summary>${levelSvg(r,pl,pl.placed.find(b=>Math.abs(r1(b.z)-z)<1e-6).z,numOf)}</details>`}).join('');
+const ord=pl.placed.map((b,i)=>({b,i})).sort((a,b)=>numOf[a.i]-numOf[b.i]);$('orderHint').textContent=pl.placed.length+' pozycji';
+$('order').innerHTML=ord.map(({b,i})=>{const c=COLORS[b.g%COLORS.length];const it=r.items[b.g]||{};const lying=b.c<=1&&it.h&&Math.abs(b.h-(+it.h))>1e-6;
+return`<div><span class="nb" style="background:${c[1]};color:${c[0]};border:1px solid ${c[0]}">${numOf[i]}</span><span style="flex:1">${b.c>1?`<b>stos ${b.c} szt.</b> · `:''}${esc(b.n)} · ${b.l}×${b.w}×${b.c>1?b.ph:b.h} cm${b.kg?` · ${r1(b.kg)} kg`:''}${b.f?' · <b>delikatna</b>':''}${lying?' · <b>na boku</b>':''}</span><span class="muted">wys. ${r1(b.z)} cm</span></div>`}).join('');
+const dd=r.due?new Date(r.due+'T00:00').toLocaleDateString('pl-PL'):'—';
+$('printHead').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:6px"><div><div style="font-size:12px;color:#555">Pallet Planner Pro [GDS] · arkusz układania</div><div style="font-size:22px;font-weight:800">Zlecenie: ${esc(r.ord||'—')}</div></div><div style="text-align:right;font-size:14px">Termin: <b>${esc(dd)}</b><br>Paleta ${curPal+1} z ${np} · ${P.L}×${P.W} cm</div></div>
+<div style="font-size:13px;color:#333">Elementów: <b>${pl.placed.reduce((x,b)=>x+(b.c||1),0)}</b> · Wysokość z paletą: <b>${r1(top+P.ph)} cm</b> · Waga z paletą: <b>${fmt(pl.kg+P.pkg)} kg</b> · wydruk ${new Date().toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'})}</div>`}
+$('ptabs').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(b&&result){curPal=+b.dataset.p;showResult()}});
+
+/* ---------- EKSPORT ---------- */
+function summary(){if(!result)return'';const r=result;const P=r.P;return[`Zlecenie: ${r.ord||'—'}${r.due?' · termin '+new Date(r.due+'T00:00').toLocaleDateString('pl-PL'):''}`,`Paleta: ${P.L}×${P.W} cm, limit ${P.maxH} cm / ${fmt(P.maxKgT)} kg`,`Potrzebne palety: ${r.pallets.length}`,...r.pallets.map((p,i)=>`- Paleta ${i+1}: ${p.placed.reduce((x,b)=>x+(b.c||1),0)} szt., ${r1(PalletEngine.topOf(p)+P.ph)} cm, ${fmt(p.kg+P.pkg)} kg`),...(r.unplaceable.length?[`Nie mieści się: ${r.unplaceable.length} paczek`]:[])].join('\n')}
+$('copy').onclick=async()=>{const t=summary();try{await navigator.clipboard.writeText(t);$('saveMsg').innerHTML='<p class="msg info">Skopiowano opis planu.</p>'}catch(e){const b=$('copyBox');b.hidden=false;b.value=t;b.select();$('saveMsg').innerHTML='<p class="msg info">Zaznacz i skopiuj tekst poniżej.</p>'}};
+function snapshot(){const c=document.createElement('canvas');c.width=1400;c.height=1000;draw3D(c,result,curPal,{light:true});return c}
+$('pdf').onclick=()=>{if(!result)return;$('orderCard').open=true;$('lvCard').open=true;document.querySelectorAll('#levels details').forEach(d=>d.open=true);$('printImg').src=snapshot().toDataURL('image/png');setTimeout(()=>{try{window.print()}catch(e){$('saveMsg').innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}},150)};
+$('png').onclick=()=>{if(!result)return;const c=snapshot();const x=c.getContext('2d');x.fillStyle='#111';x.font='bold 30px system-ui,sans-serif';x.textAlign='right';x.textBaseline='bottom';x.fillText('Zlecenie '+(result.ord||'—')+' · paleta '+(curPal+1)+'/'+result.pallets.length,c.width-20,c.height-40);x.font='18px system-ui,sans-serif';x.fillStyle='#888';x.fillText('Pallet Planner Pro [GDS]',c.width-20,c.height-14);
+c.toBlob(b=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(result.ord||$('planName').value||'paleta').replace(/[^\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ -]/g,'')+'-paleta'+(curPal+1)+'.png';document.body.appendChild(a);a.click();a.remove();$('saveMsg').innerHTML='<p class="msg info">Zapisano obraz PNG.</p>'}catch(e){$('saveMsg').innerHTML='<p class="msg err">Pobieranie plików nie działa w tym widoku.</p>'}},'image/png')};
+$('newPlan').onclick=()=>{$('ordNo').value='';$('ordDate').value='';items=[emptyItem()];uni={n:'Karton',l:'',w:'',h:'',kg:'',q:'',fragile:false,side:false};$('impMsg').innerHTML='';renderItems();result=null;currentPlanId=null;currentPlanName='';$('planName').value='';$('resBox').hidden=true;$('emptyRes').hidden=false;$('saveMsg').innerHTML='';msg('');setStep(1);$('secPal').scrollIntoView({behavior:'smooth'})};
+
+/* ---------- ZAPIS ---------- */
+async function savePlan(){if(!result)return;const sm=$('saveMsg');if(!db){sm.innerHTML='<p class="msg err">Zapis jest niedostępny.</p>';return}
+if(multi&&!cid){sm.innerHTML='<p class="msg err">Aby zapisywać plany, dołącz najpierw do firmy (u góry ekranu).</p>';return}
+const name=($('planName').value.trim()||($('ordNo').value.trim()?'Zlecenie '+$('ordNo').value.trim():''));if(name&&!$('planName').value.trim())$('planName').value=name;if(!name){sm.innerHTML='<p class="msg err">Podaj nazwę planu.</p>';$('planName').focus();return}
+if(currentPlanId&&name!==currentPlanName)currentPlanId=null;const upd=!!currentPlanId;const r=result;const now=new Date().toISOString();
+const body={name,ord:r.ord||'',due:r.due||'',mode:r.mode,P:r.P,items:r.items,pattern:r.pattern,unplaceable:r.unplaceable,pallets:r.pallets,updatedAt:now,updatedBy:myId,updatedByName:myName,createdAt:now};
+$('save').disabled=true;try{if(upd)await db.collection(P('stacks')).doc(currentPlanId).set(body);else{const ref=await db.collection(P('stacks')).add(body);currentPlanId=ref.id}
+currentPlanName=name;sm.innerHTML=`<p class="msg info">${upd?'Zaktualizowano':'Zapisano nowy'} plan „${esc(name)}”. Aby zapisać kolejny, wpisz inną nazwę.</p>`}
+catch(e){console.error('save',e);sm.innerHTML=`<p class="msg err">${e&&e.code==='permission-denied'?'Brak uprawnień do zapisu w tej firmie.':'Nie udało się zapisać. Spróbuj ponownie.'}</p>`}finally{$('save').disabled=false}}
+$('save').onclick=savePlan;
+function loadPlan(x,id){if(!x||!x.pallets)return;mode=x.mode||'mixed';if(mode==='uni')uni={...(x.items||[])[0]};else items=(x.items||[]).map(i=>({...i}));
+const p=x.P||{};$('palL').value=p.L;$('palW').value=p.W;$('palH').value=p.ph;$('palKg').value=p.pkg;$('maxH').value=p.maxH;$('maxKg').value=p.maxKgT;$('over').value=p.over||0;$('sup').value=Math.round((p.support||.75)*100);$('heavy').checked=p.heavyDown!==false;$('palType').value=p.type||'own';if(p.dens){$('dens').value=p.dens;$('densSel').value=['650','750','850','500'].includes(String(p.dens))?String(p.dens):'own'}palHint();
+$('ordNo').value=x.ord||'';$('ordDate').value=x.due||'';setMode(mode);
+result={mode,P:p,items:x.items||[],pallets:x.pallets,unplaceable:x.unplaceable||[],pattern:x.pattern||null,ord:x.ord||'',due:x.due||'',at:x.updatedAt};curPal=0;
+currentPlanId=id;currentPlanName=x.name||'';$('planName').value=x.name||'';$('saveMsg').innerHTML='';msg('');showResult();setStep(3);$('recCard').scrollIntoView({behavior:'smooth',block:'start'})}
+function renderSaved(){const box=$('savedList');$('savedHint').textContent=savedDocs.length+' zapisanych'+(multi&&typeof curCo==='function'&&curCo()?' · '+curCo().name:'');
+if(!savedDocs.length){box.innerHTML='<p class="muted" style="margin:0">Nie ma jeszcze zapisanych planów.</p>';return}
+box.innerHTML=savedDocs.map(d=>{const x=d.data()||{};const n=(x.pallets||[]).reduce((a,p)=>a+(p.placed||[]).reduce((q,b)=>q+(b.c||1),0),0);const dt=x.updatedAt?new Date(x.updatedAt).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'}):'';const who=String(x.updatedByName||'').split('@')[0];const due=x.due?new Date(x.due+'T00:00').toLocaleDateString('pl-PL'):'';
+return`<div class="it"><div class="t"><b>${esc(x.name)}</b><span>${x.ord?'zl. '+esc(x.ord)+' · ':''}${due?'termin '+esc(due)+' · ':''}${(x.pallets||[]).length} pal. · ${n} szt. · ${dt}${who?' · '+esc(who):''}</span></div><button class="btn sm" data-open="${esc(d.id)}">Otwórz</button><button class="x" data-delplan="${esc(d.id)}" aria-label="Usuń plan">×</button></div>`}).join('')}
+function armDelete(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed='1';btn.textContent='Usuń?';btn.style.fontSize='13px';btn.style.color='var(--bad)';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent='×';btn.style.fontSize='';btn.style.color=''}},3000)}
+$('savedList').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){const d=savedDocs.find(x=>x.id===o.dataset.open);if(d)loadPlan(d.data(),d.id);return}
+const del=e.target.closest('[data-delplan]');if(del)armDelete(del,async()=>{try{await db.collection(P('stacks')).doc(del.dataset.delplan).delete();if(currentPlanId===del.dataset.delplan){currentPlanId=null;currentPlanName=''}}catch(err){}})});
+
+const P=sub=>multi&&cid?`companies/${cid}/${sub}`:sub;
+const myMail=()=>String(myName||'').toLowerCase();
+const curCo=()=>companies.find(c=>c.id===cid);
+let isSuper=false,allCos=[],dir=[],reqs=[];const openCos=new Set();
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function subscribeData(){subs.forEach(u=>{try{u()}catch(e){}});subs=[];savedDocs=[];renderSaved();
+if(multi&&!cid){$('savedHint').textContent='';return}
+const tm=setTimeout(()=>{$('savedHint').textContent='brak połączenia'},10000);
+subs.push(db.collection(P('stacks')).orderBy('updatedAt','desc').limit(200).onSnapshot(s=>{clearTimeout(tm);savedDocs=s.docs;renderSaved()},()=>{clearTimeout(tm);$('savedHint').textContent='niedostępne'}))}
+function setCompany(id){if(id===cid)return;cid=id;lsSet('cp_company',id||'');currentPlanId=null;currentPlanName='';$('saveMsg').innerHTML='';renderCompanies();subscribeData()}
+function renderCompanies(){if(!multi)return;const has=companies.length>0;
+$('coBar').hidden=!has&&!isSuper;$('coSel').hidden=!has;$('coBtn').hidden=!isSuper;
+$('coSel').innerHTML=companies.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(cid)$('coSel').value=cid;
+$('coJoin').hidden=has||isSuper;
+const pend=reqs.filter(r=>r.email===myMail());
+$('joinPending').innerHTML=pend.length?pend.map(r=>`<p class="msg info" style="margin:0 0 10px">Prośba o dostęp do <b style="color:var(--tx)">${esc(r.name||'firmy')}</b> czeka na akceptację.</p>`).join(''):'';
+$('joinSel').innerHTML=dir.length?dir.map(d=>`<option value="${esc(d.id)}">${esc(d.name)}</option>`).join(''):'<option value="">Brak firm – poczekaj, aż administrator je doda</option>';
+$('reqBadge').hidden=!(isSuper&&reqs.length);$('reqBadge').textContent=reqs.length;
+if(isSuper)renderAdmin()}
+function renderAdmin(){const pending=reqs;
+$('coBody').innerHTML=`<h3 style="margin:0 0 8px;font-size:15px">Prośby o dostęp ${pending.length?`<span class="tag">${pending.length}</span>`:''}</h3>
+${pending.length?pending.map(r=>`<div class="mem"><span>${esc(r.email)} → <b>${esc(r.name||'')}</b></span><button class="btn sm or" data-acc="${esc(r.id)}">Akceptuj</button><button class="x" data-rej="${esc(r.id)}" aria-label="Odrzuć">×</button></div>`).join(''):'<p class="muted" style="margin:0">Brak nowych próśb.</p>'}
+<h3 style="margin:16px 0 8px;font-size:15px">Firmy</h3>
+${allCos.length?allCos.map(c=>`<details data-co="${esc(c.id)}" ${openCos.has(c.id)?'open':''} style="border-top:1px solid var(--bd);padding:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(c.name)} <span class="muted" style="font-weight:400">· ${(c.members||[]).length} os.</span></summary>
+<div style="padding:6px 0 0">${(c.members||[]).map(m=>`<div class="mem"><span>${esc(m)}</span><button class="x" data-rmem="${esc(c.id)}|${esc(m)}" aria-label="Usuń dostęp">×</button></div>`).join('')||'<p class="muted" style="margin:0">Brak członków.</p>'}
+<div class="row" style="margin-top:8px"><input type="email" placeholder="dodaj e-mail" data-addmail="${esc(c.id)}" style="flex:1;min-width:150px"><button class="btn sm" data-addmem="${esc(c.id)}">Dodaj</button></div></div></details>`).join(''):'<p class="muted" style="margin:0">Nie ma jeszcze firm.</p>'}
+<div style="border-top:1px solid var(--bd);margin-top:12px;padding-top:12px"><label class="lbl">Nowa firma</label><div class="row"><input type="text" id="coNew" placeholder="nazwa firmy" style="flex:1;min-width:150px"><button class="btn sm or" id="coCreate">Utwórz firmę</button></div>
+<label class="tog" style="margin-top:8px"><input type="checkbox" id="coSelf" checked>Dodaj mnie jako członka (będę widzieć jej plany)</label></div>
+<p class="muted" id="coMsg" style="margin:6px 0 0"></p>
+<p class="muted" style="margin:10px 0 0;font-size:12px">Plany firmy widzą tylko jej członkowie. Administrator widzi listę firm i prośby, ale nie plany firm, do których nie należy.</p>`}
+async function createCompany(){const name=$('coNew').value.trim(),m=$('coMsg');if(!name){m.textContent='Podaj nazwę firmy.';return}
+try{const ref=db.collection('companies').doc();await ref.set({name,members:$('coSelf').checked?[myMail()]:[],createdAt:new Date().toISOString(),createdBy:myMail()});await db.collection('directory').doc(ref.id).set({name});m.textContent='Utworzono firmę „'+name+'”.';$('coNew').value=''}catch(e){m.textContent='Nie udało się utworzyć firmy.'}}
+async function setMembers(id,fn){const c=allCos.find(x=>x.id===id);if(!c)return;const members=[...(c.members||[])];fn(members);
+await db.collection('companies').doc(id).set({name:c.name,members,createdAt:c.createdAt||'',createdBy:c.createdBy||''})}
+$('coSel').onchange=e=>setCompany(e.target.value);
+$('coBody').addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.co){if(d.open)openCos.add(d.dataset.co);else openCos.delete(d.dataset.co)}},true);
+$('coBtn').onclick=()=>{const c=$('coCard');c.hidden=!c.hidden;c.open=!c.hidden};
+$('joinBtn').onclick=async()=>{const id=$('joinSel').value,m=$('joinMsg');if(!id){m.textContent='Wybierz firmę.';return}const d=dir.find(x=>x.id===id);
+try{await db.collection('requests').doc(id+'_'+myMail()).set({cid:id,name:d?d.name:'',email:myMail(),createdAt:new Date().toISOString()});m.textContent='Wysłano prośbę. Poczekaj na akceptację.'}catch(e){m.textContent='Nie udało się wysłać prośby.'}};
+$('coBody').addEventListener('click',async e=>{const m=$('coMsg');
+if(e.target.id==='coCreate'){createCompany();return}
+const acc=e.target.closest('[data-acc]');if(acc){const r=reqs.find(x=>x.id===acc.dataset.acc);if(!r)return;try{await setMembers(r.cid,mem=>{if(!mem.includes(r.email))mem.push(r.email)});await db.collection('requests').doc(r.id).delete()}catch(err){if(m)m.textContent='Nie udało się zaakceptować.'}return}
+const rej=e.target.closest('[data-rej]');if(rej){armDelete(rej,async()=>{try{await db.collection('requests').doc(rej.dataset.rej).delete()}catch(err){}});return}
+const add=e.target.closest('[data-addmem]');if(add){const inp=$('coBody').querySelector(`[data-addmail="${add.dataset.addmem}"]`);const v=(inp.value||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.textContent='Podaj poprawny e-mail.';return}try{await setMembers(add.dataset.addmem,mem=>{if(!mem.includes(v))mem.push(v)})}catch(err){m.textContent='Nie udało się dodać.'}return}
+const rm=e.target.closest('[data-rmem]');if(rm){armDelete(rm,async()=>{const[id,em]=rm.dataset.rmem.split('|');try{await setMembers(id,mem=>{const i=mem.indexOf(em);if(i>=0)mem.splice(i,1)})}catch(err){}})}});
+function onMyCompanies(list){companies=list.sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));
+let want=cid&&companies.some(c=>c.id===cid)?cid:null;if(!want){const last=lsGet('cp_company');want=companies.some(c=>c.id===last)?last:(companies[0]&&companies[0].id)||null}
+if(want!==cid){cid=want;currentPlanId=null;currentPlanName='';subscribeData()}renderCompanies()}
+window.startDb=async function(adb,me){db=adb;myId=me.uid||'';myName=me.email||'';multi=!!me.multi;if(myName)$('who').textContent=myName;
+if(!multi){subscribeData();return}
+try{await db.collection('meta').doc('super').get();isSuper=true}catch(e){isSuper=false}
+const snap=(list)=>list.docs.map(d=>({id:d.id,...(d.data()||{})}));
+if(isSuper){db.collection('companies').onSnapshot(s=>{allCos=snap(s).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));onMyCompanies(allCos.filter(c=>(c.members||[]).includes(myMail())))},()=>{});
+db.collection('requests').onSnapshot(s=>{reqs=snap(s);renderCompanies()},()=>{})}
+else{db.collection('companies').where('members','array-contains',myMail()).onSnapshot(s=>onMyCompanies(snap(s)),()=>{$('savedHint').textContent='niedostępne'});
+db.collection('requests').where('email','==',myMail()).onSnapshot(s=>{reqs=snap(s);renderCompanies()},()=>{})}
+db.collection('directory').onSnapshot(s=>{dir=snap(s).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pl'));renderCompanies()},()=>{});
+renderCompanies()};
+window.noDb=function(t){$('savedHint').textContent='niedostępne';$('savedList').innerHTML=`<p class="muted" style="margin:0">${t}</p>`};
+
+
+renderItems();palHint();setStep(1);
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,setDoc,addDoc,deleteDoc,onSnapshot,query,orderBy,limit,where} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {firebaseConfig} from "./firebase-config.js";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),fs=getFirestore(app);
+const wrap=s=>({id:s.id,exists:s.exists(),data:()=>s.data()});
+const dref=(p,id)=>{const r=doc(fs,p,id);return{id:r.id,get:async()=>wrap(await getDoc(r)),set:d=>setDoc(r,d),delete:()=>deleteDoc(r)}};
+const coll=(p,c=[])=>({where:(f,op,v)=>coll(p,[...c,where(f,op,v)]),doc:id=>dref(p,id||doc(collection(fs,p)).id),add:async d=>({id:(await addDoc(collection(fs,p),d)).id}),orderBy:(f,dir)=>coll(p,[...c,orderBy(f,dir)]),limit:n=>coll(p,[...c,limit(n)]),onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),...c),s=>n({docs:s.docs.map(wrap),metadata:s.metadata}),x=>e&&e(x))});
+const $=id=>document.getElementById(id);let started=false;
+onAuthStateChanged(auth,u=>{if(u){$('login').style.display='none';$('logout').hidden=false;if(!started){started=true;window.startDb({collection:p=>coll(p)},{uid:u.uid,email:u.email,multi:true})}}else{$('login').style.display='flex';if(started)location.reload()}});
+let reg=false;
+$('lmode').onclick=()=>{reg=!reg;$('lp2box').hidden=!reg;$('lp2').required=reg;$('lb').textContent=reg?'Załóż konto':'Zaloguj';$('lsub').textContent=reg?'Utwórz konto dla siebie i swojej firmy':'Zaloguj się, aby kontynuować';$('lmode').textContent=reg?'Masz konto? Zaloguj się':'Nie masz konta? Załóż konto';$('lr').hidden=reg;$('lp').autocomplete=reg?'new-password':'current-password';$('lmsg').textContent=''};
+const errPl=c=>({'auth/email-already-in-use':'Konto z tym e-mailem już istnieje. Zaloguj się.','auth/invalid-email':'Nieprawidłowy adres e-mail.','auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.','auth/operation-not-allowed':'Rejestracja jest wyłączona.','auth/too-many-requests':'Zbyt wiele prób. Spróbuj za chwilę.'}[c]);
+$('lf').onsubmit=async e=>{e.preventDefault();$('lmsg').textContent='';const em=$('le').value.trim(),pw=$('lp').value;
+if(reg&&pw!==$('lp2').value){$('lmsg').textContent='Hasła nie są takie same.';return}
+$('lb').disabled=true;try{if(reg)await createUserWithEmailAndPassword(auth,em,pw);else await signInWithEmailAndPassword(auth,em,pw)}
+catch(err){$('lmsg').textContent=errPl(err&&err.code)||(reg?'Nie udało się założyć konta.':'Nieprawidłowy e-mail lub hasło.')}finally{$('lb').disabled=false}};
+$('lr').onclick=async()=>{const m=$('le').value.trim();if(!m){$('lmsg').textContent='Wpisz najpierw e-mail.';return}try{await sendPasswordResetEmail(auth,m);$('lmsg').textContent='Wysłaliśmy link do zmiany hasła.'}catch(e){$('lmsg').textContent='Nie udało się wysłać linku.'}};
+$('logout').onclick=()=>signOut(auth);
+</script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+(()=>{const b=document.getElementById('install'),h=document.getElementById('installHelp');let ev=null;
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;if(standalone)return;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ev=e;b.hidden=false});
+if(ios)b.hidden=false;
+b.onclick=async()=>{if(ev){ev.prompt();const r=await ev.userChoice;if(r.outcome==='accepted')b.hidden=true;ev=null}else{h.hidden=!h.hidden}};
+addEventListener('appinstalled',()=>{b.hidden=true;h.hidden=true});})();</script>
+
+</body>
+</html>

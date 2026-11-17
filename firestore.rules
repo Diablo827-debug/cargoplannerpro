@@ -31,8 +31,11 @@ service cloud.firestore {
       allow create, update, delete: if isSuper();
 
       // Plany firmy: wyłącznie członkowie tej firmy (także administrator musi być członkiem)
-      match /plans/{pid} {
-        allow read, write: if signedIn() && me() in company(cid).members;
+      // Plany firmy (Cargo: plans, Pallet Planner: stacks): wyłącznie członkowie tej firmy
+      match /{coll}/{pid} {
+        allow read, write: if signedIn()
+          && (coll == 'plans' || coll == 'stacks')
+          && me() in company(cid).members;
       }
     }
   }
