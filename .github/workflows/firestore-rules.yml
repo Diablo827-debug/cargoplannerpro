@@ -28,4 +28,19 @@ jobs:
       - name: Wgraj reguły
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
-        run: npx -y firebase-tools@latest deploy --only firestore:rules --project cargoplannerpro --non-interactive
+        run: |
+          cd "$RUNNER_TEMP" && npm i -s google-auth-library@9 >/dev/null
+          cat > deploy.cjs <<'JS'
+          const fs=require('fs');const {GoogleAuth}=require('google-auth-library');
+          (async()=>{
+            const P='cargoplannerpro',B='https://firebaserules.googleapis.com/v1/projects/'+P;
+            const c=await new GoogleAuth({scopes:['https://www.googleapis.com/auth/cloud-platform']}).getClient();
+            const src=fs.readFileSync(process.env.GITHUB_WORKSPACE+'/firestore.rules','utf8');
+            const rs=(await c.request({url:B+'/rulesets',method:'POST',data:{source:{files:[{name:'firestore.rules',content:src}]}}})).data;
+            console.log('Ruleset:',rs.name);
+            const rel='projects/'+P+'/releases/cloud.firestore';
+            await c.request({url:'https://firebaserules.googleapis.com/v1/'+rel,method:'PATCH',data:{release:{name:rel,rulesetName:rs.name}}});
+            console.log('Reguły wgrane ✔');
+          })().catch(e=>{console.error(e.response?.data?JSON.stringify(e.response.data):e.message);process.exit(1)});
+          JS
+          node deploy.cjs
