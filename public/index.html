@@ -311,7 +311,7 @@ function hint(){const n=items.reduce((a,b)=>a+(+b.q||0),0),kg=totalKg();$('itHin
 $('items').addEventListener('input',e=>{const row=e.target.closest('.pal');if(!row)return;const it=items[+row.dataset.i],k=e.target.dataset.k;if(!k)return;if(k==='front')it.front=e.target.checked;else if(k==='rot'){it.rot=e.target.checked;renderItems();return}else it[k]=e.target.value===''?'':+e.target.value;hint();setStep(1)});
 $('items').addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');if(rm){items.splice(+rm.dataset.rm,1);renderItems();return}
 const d=e.target.closest('[data-d]');if(d){const row=d.closest('.pal');const it=items[+row.dataset.i];it.q=Math.max(1,(+it.q||0)+(+d.dataset.d));row.querySelector('[data-k=q]').value=it.q;hint()}});
-function addItem(l,w){const last=items[items.length-1];if(l&&last&&!last.l&&!last.w&&!last.kg){last.l=l;last.w=w}else items.push({l:l||'',w:w||'',q:1,kg:'',front:false,rot:true});renderItems();const rows=$('items').querySelectorAll('.pal');const last=rows[rows.length-1];if(last){last.scrollIntoView({block:'nearest'});last.querySelector(l?'[data-k=kg]':'[data-k=l]').focus()}}
+function addItem(l,w){const last=items[items.length-1];if(l&&last&&!last.l&&!last.w&&!last.kg){last.l=l;last.w=w}else items.push({l:l||'',w:w||'',q:1,kg:'',front:false,rot:true});renderItems();const rows=$('items').querySelectorAll('.pal');const row=rows[rows.length-1];if(row){row.scrollIntoView({block:'nearest'});row.querySelector(l?'[data-k=kg]':'[data-k=l]').focus()}}
 $('addItem').onclick=()=>addItem();
 function setWMode(w){wMode=w;document.querySelectorAll('#wSeg button').forEach(b=>b.classList.toggle('on',b.dataset.w===w));$('totalBox').hidden=w!=='total';renderItems();if(w==='total'&&!$('totalKg').value){const s=items.reduce((a,b)=>a+(+b.q||0)*(+b.kg||0),0);if(s)$('totalKg').value=s}}
 document.querySelectorAll('#wSeg button').forEach(b=>b.onclick=()=>setWMode(b.dataset.w));
@@ -473,7 +473,7 @@ const del=e.target.closest('[data-delplan]');if(del)armDelete(del,async()=>{try{
 const P=sub=>multi&&cid?`companies/${cid}/${sub}`:sub;
 const myMail=()=>String(myName||'').toLowerCase();
 const curCo=()=>companies.find(c=>c.id===cid);
-let isSuper=false,allCos=[],dir=[],reqs=[];
+let isSuper=false,allCos=[],dir=[],reqs=[];const openCos=new Set();
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 function subscribeData(){subs.forEach(u=>{try{u()}catch(e){}});subs=[];savedDocs=[];renderSaved();
 if(multi&&!cid){$('savedHint').textContent='';return}
@@ -493,7 +493,7 @@ function renderAdmin(){const pending=reqs;
 $('coBody').innerHTML=`<h3 style="margin:0 0 8px;font-size:15px">Prośby o dostęp ${pending.length?`<span class="tag">${pending.length}</span>`:''}</h3>
 ${pending.length?pending.map(r=>`<div class="mem"><span>${esc(r.email)} → <b>${esc(r.name||'')}</b></span><button class="btn sm or" data-acc="${esc(r.id)}">Akceptuj</button><button class="x" data-rej="${esc(r.id)}" aria-label="Odrzuć">×</button></div>`).join(''):'<p class="muted" style="margin:0">Brak nowych próśb.</p>'}
 <h3 style="margin:16px 0 8px;font-size:15px">Firmy</h3>
-${allCos.length?allCos.map(c=>`<details style="border-top:1px solid var(--bd);padding:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(c.name)} <span class="muted" style="font-weight:400">· ${(c.members||[]).length} os.</span></summary>
+${allCos.length?allCos.map(c=>`<details data-co="${esc(c.id)}" ${openCos.has(c.id)?'open':''} style="border-top:1px solid var(--bd);padding:8px 0"><summary style="cursor:pointer;font-weight:600">${esc(c.name)} <span class="muted" style="font-weight:400">· ${(c.members||[]).length} os.</span></summary>
 <div style="padding:6px 0 0">${(c.members||[]).map(m=>`<div class="mem"><span>${esc(m)}</span><button class="x" data-rmem="${esc(c.id)}|${esc(m)}" aria-label="Usuń dostęp">×</button></div>`).join('')||'<p class="muted" style="margin:0">Brak członków.</p>'}
 <div class="row" style="margin-top:8px"><input type="email" placeholder="dodaj e-mail" data-addmail="${esc(c.id)}" style="flex:1;min-width:150px"><button class="btn sm" data-addmem="${esc(c.id)}">Dodaj</button></div></div></details>`).join(''):'<p class="muted" style="margin:0">Nie ma jeszcze firm.</p>'}
 <div style="border-top:1px solid var(--bd);margin-top:12px;padding-top:12px"><label class="lbl">Nowa firma</label><div class="row"><input type="text" id="coNew" placeholder="nazwa firmy" style="flex:1;min-width:150px"><button class="btn sm or" id="coCreate">Utwórz firmę</button></div>
@@ -505,6 +505,7 @@ try{const ref=db.collection('companies').doc();await ref.set({name,members:$('co
 async function setMembers(id,fn){const c=allCos.find(x=>x.id===id);if(!c)return;const members=[...(c.members||[])];fn(members);
 await db.collection('companies').doc(id).set({name:c.name,members,createdAt:c.createdAt||'',createdBy:c.createdBy||''})}
 $('coSel').onchange=e=>setCompany(e.target.value);
+$('coBody').addEventListener('toggle',e=>{const d=e.target;if(d.dataset&&d.dataset.co){if(d.open)openCos.add(d.dataset.co);else openCos.delete(d.dataset.co)}},true);
 $('coBtn').onclick=()=>{const c=$('coCard');c.hidden=!c.hidden;c.open=!c.hidden};
 $('joinBtn').onclick=async()=>{const id=$('joinSel').value,m=$('joinMsg');if(!id){m.textContent='Wybierz firmę.';return}const d=dir.find(x=>x.id===id);
 try{await db.collection('requests').doc(id+'_'+myMail()).set({cid:id,name:d?d.name:'',email:myMail(),createdAt:new Date().toISOString()});m.textContent='Wysłano prośbę. Poczekaj na akceptację.'}catch(e){m.textContent='Nie udało się wysłać prośby.'}};
