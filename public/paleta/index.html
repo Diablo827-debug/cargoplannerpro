@@ -537,7 +537,7 @@ function solveUniform(box,qty,P,opts={}){
 
 
 /* ===== Paleta z płyty: dobór wymiaru (zasady jak w GDS) ===== */
-const DEST={PL:{deck:18,pack:20,margin:10,round:'up',lieAdd:0,shapes:[[250,100],[140,140]]},ES:{deck:36,pack:30,margin:20,round:'max',lieAdd:20,shapes:[[250,120],[140,140]]},
+const DEST={PL:{deck:18,pack:20,margin:10,round:'up',loadLim:true,lieAdd:0,shapes:[[250,100],[140,140]]},ES:{deck:36,pack:30,margin:20,round:'max',lieAdd:20,shapes:[[250,120],[140,140]]},
   US:{us:true,deck:0,pack:0,wall:2,margin:4,round:'cm',lieAdd:0,shapes:[[240,120]],palKgM2:25,crateKgM2:4}};
 /* USA: skrzynia z płyty HDF + plaster miodu (ścianki, dno, wieko po 2 cm) na drewnianej palecie na wymiar; obrys palety = obrys skrzyni */
 function crateBuild(L,W,Hl,D,ph){const t=D.wall??2,Hw=Math.ceil(Hl+t),a=(l,w)=>l*w/1e4;
@@ -581,10 +581,11 @@ function solveCustom(boxes,cfg,opts={}){
     const Hload=maxTot-ph-extraH-(D.us?2*(D.wall??2):0);const margin=D.margin+extraM;
     const bx=boxes.map(b=>b.solid?orientSolid(b,b.fix&&b.fix!=='auto'?b.fix:st,Hload):(b.fix==='flat'?{...b,side:false,pose:'flat'}:b.fix==='upright'?orientPanel(b,Hload):((cfg.panelUp===false||cfg.dest==='ES')?{...b,side:false,pose:'flat'}:orientPanel(b,Hload))));
     const VOL=bx.reduce((s,b)=>s+b.l*b.w*b.h,0),hEst=(L,W)=>D.us?Math.min(Hload,Math.max(...bx.map(b=>b.h)),VOL/Math.max(1,L*W))*1+Math.min(Hload,VOL/Math.max(1,L*W))*0:Hload;
+    const BXV=[bx,bx.map(b=>b.solid?{...b,l:b.w,w:b.l}:b)]; /* dwa warianty obrotu mebli – greedy inaczej układa rzędy */
     const mL=Math.max(...bx.map(b=>Math.max(b.l,b.w))),mW=Math.max(...bx.map(b=>Math.min(b.l,b.w)));
     const shrink=(pl)=>{
         const mx=Math.max(...pl.placed.map(q=>q.x+q.l)),my=Math.max(...pl.placed.map(q=>q.y+q.w)),top=topOf(pl);
-        const fitS=(a,b)=>(D.shapes||[]).some(([x,y])=>Math.max(a,b)<=x+1e-9&&Math.min(a,b)<=y+1e-9);
+        const fitS=(a,b)=>{const m=D.loadLim?margin:0;return(D.shapes||[]).some(([x,y])=>Math.max(a,b)-m<=x+1e-9&&Math.min(a,b)-m<=y+1e-9)}; /* PL: limit dotyczy obrysu ładunku, paleta = ładunek + 10 */
         const rnd=v=>{const t=v+margin;if(D.round==='cm')return Math.ceil(t-1e-9);let r=D.round==='max'?Math.floor(t/10+1e-9)*10:Math.ceil(t/10-1e-9)*10;if(D.round==='max'&&r<v+Math.min(10,margin)-1e-9)r=Math.ceil((v+Math.min(10,margin))/10-1e-9)*10;return r};
         let L=Math.max(rnd(mx),minL),W=Math.max(rnd(my),minW);
         if(!fitS(L,W)){const L0=Math.max(Math.ceil(mx+margin-1e-9),minL),W0=Math.max(Math.ceil(my+margin-1e-9),minW);if(fitS(L0,W)&&!fitS(L,W))L=L0;if(!fitS(L,W)&&fitS(L,W0))W=W0;if(!fitS(L,W)){L=L0;W=W0}}
@@ -602,20 +603,20 @@ function solveCustom(boxes,cfg,opts={}){
     const cands=[];
     for(const [SL,SW] of D.shapes){
       const est=cb(SL,SW,D.us?Math.min(Hload,Math.max(...bx.map(b=>b.h))):Hload);const goods=maxKg-D.pack-est.kg;
-      const st5=v=>Math.ceil(v/5)*5;const stp=5;const Ls=[...new Set([Math.max(mL,minL-margin),...Array.from({length:60},(_,i)=>st5(Math.max(mL,minL-margin))+stp*i)])].filter(v=>v<=SL-margin+1e-9);const Ws=[...new Set([Math.max(mW,minW-margin),...Array.from({length:40},(_,i)=>st5(Math.max(mW,minW-margin))+stp*i)])].filter(v=>v<=SW-margin+1e-9);
+      const st5=v=>Math.ceil(v/5)*5;const stp=5;const Ls=[...new Set([Math.max(mL,minL-margin),...Array.from({length:60},(_,i)=>st5(Math.max(mL,minL-margin))+stp*i)])].filter(v=>v<=SL-(D.loadLim?0:margin)+1e-9);const Ws=[...new Set([Math.max(mW,minW-margin),...Array.from({length:40},(_,i)=>st5(Math.max(mW,minW-margin))+stp*i)])].filter(v=>v<=SW-(D.loadLim?0:margin)+1e-9);
       for(const Lc of Ls)for(const Wc of Ws){if(Wc>Lc+1e-9)continue;
         const P={L:Lc,W:Wc,H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false};
         const estC=cb(Math.max(minL,Lc+margin),Math.max(minW,Wc+margin),D.us?Math.min(Hload,D.parcel?Math.min(...bx.map(b=>b.h)):Math.max(Math.max(...bx.map(b=>b.h)),VOL/(Lc*Wc))):Hload);P.maxKg=maxKg-D.pack-estC.kg;
-        for(const cp of [true,false]){const Pc={...P,compact:cp};const r=packAll(customOrder(bx),Pc,new Map());cands.push({P:Pc,ev:evalRes(r,[SL,SW])})}
+        for(const cp of [true,false])for(const B of BXV){const Pc={...P,compact:cp};const r=packAll(customOrder(B),Pc,new Map());cands.push({P:Pc,B,ev:evalRes(r,[SL,SW])})}
       }
       /* zawsze także pełny obrys (gdy pojedynczy element jest bardzo duży) */
-      const Pm={L:SL-margin,W:SW-margin,H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false};
+      const Pm={L:SL-(D.loadLim?0:margin),W:SW-(D.loadLim?0:margin),H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false};
       if(Pm.L>0&&Pm.W>0)for(const cp of [true,false]){const Pc={...Pm,compact:cp};cands.push({P:Pc,ev:evalRes(packAll(customOrder(bx),Pc,new Map()),[SL,SW])})}
     }
     const cmp0=(a,b)=>a.ev.score[0]-b.ev.score[0]||a.ev.score[1]-b.ev.score[1]||a.ev.score[2]-b.ev.score[2]||a.ev.score[3]-b.ev.score[3];
     cands.sort(cmp0);
     /* 2) dopracowanie najlepszych kandydatów wyszukiwaniem */
-    for(const c of cands.slice(0,4)){const r=solveMixed(bx,c.P,{ms:per,start:customOrder});const ev=evalRes(r,c.ev.shape);runs.push(cmp0({ev},c)<=0?ev:c.ev)}
+    for(const c of cands.slice(0,4)){const r=solveMixed(c.B||bx,c.P,{ms:per,start:customOrder});const ev=evalRes(r,c.ev.shape);runs.push(cmp0({ev},c)<=0?ev:c.ev)}
   }
   if(!runs.length)return{pallets:[],unplaceable:boxes,alt:[]};
   const cmp=(a,b)=>a.score[0]-b.score[0]||a.score[1]-b.score[1]||a.score[2]-b.score[2]||a.score[3]-b.score[3];
