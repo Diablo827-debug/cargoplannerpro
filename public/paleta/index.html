@@ -672,8 +672,8 @@ d.querySelectorAll('sheetData row').forEach(r=>{const row=[];r.querySelectorAll(
 if(t==='s'&&v)val=ss[+v.textContent]??'';else if(t==='inlineStr'){val=[...c.getElementsByTagName('t')].map(q=>q.textContent).join('')}else if(v)val=v.textContent;row[col<0?row.length:col]=val});rows.push(row)});out.push({name:sh.name,rows})}return out}
 function readCsv(text){const sep=(text.split('\n')[0].match(/;/g)||[]).length>(text.split('\n')[0].match(/,/g)||[]).length?';':',';return[{name:'CSV',rows:text.split(/\r?\n/).filter(Boolean).map(l=>l.split(sep).map(s=>s.replace(/^"|"$/g,'').trim()))}]}
 const E_=String.raw`(?=$|[\s(\[.,:/_-])`;
-const HDR={n:/^(nazwa|opis|element|mebel|produkt|towar|nazwa produktu|nazwa paczki)/i,sym:/^(symbol|kod|indeks)/i,
-len:new RegExp('^(d[łl]ugo[śs][ćc]|d[łl]\\.?|dl|length|l)'+E_,'i'),wid:new RegExp('^(szeroko[śs][ćc]|szer\\.?|width|w)'+E_,'i'),
+const HDR={tb:/grubo[śs][ćc].*(wie[ńn]c|blat)/i,n:/^(nazwa|opis|element|mebel|produkt|towar|nazwa produktu|nazwa paczki)/i,sym:/^(symbol|kod|indeks)/i,
+len:new RegExp('^(d[łl]ugo[śs][ćc]|d[łl]\\.?|dl|length)'+E_,'i'),wid:new RegExp('^(szeroko[śs][ćc]|szer\\.?|width|w)'+E_,'i'),
 dep:new RegExp('^(g[łl][ęe]boko[śs][ćc]|g[łl][ęe]b\\.?|depth|d)'+E_,'i'),hei:new RegExp('^(wysoko[śs][ćc]|wys\\.?|grubo[śs][ćc]|grub\\.?|height|h)'+E_,'i'),
 kg:/^(waga|masa|kg|ci[ęe][żz]ar|weight)/i,q:/^(ilo[śs][ćc]|szt|sztuk|qty|liczba)/i};
 const xlDate=v=>{const n=parseFloat(v);if(n>20000&&n<80000){const d=new Date(Date.UTC(1899,11,30)+n*864e5);return d.toISOString().slice(0,10)}const m=String(v).match(/(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})/);if(m)return`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;const m2=String(v).match(/(\d{4})-(\d{2})-(\d{2})/);return m2?m2[0]:''};
@@ -682,17 +682,17 @@ for(let r=0;r<Math.min(R.length,30);r++)(R[r]||[]).forEach((v,c)=>{const t=Strin
 if(!out.due&&/^(termin|data realizacji|termin realizacji|data dostawy)/i.test(t)){const x=next(r,c);const d=xlDate(x);if(d)out.due=d}
 if(!out.ord&&/^(nr|numer)\s*(zam|zlec)|^zam[óo]wienie\s*(nr|numer)|^nr\.?\s*$/i.test(t)){const x=next(r,c);if(x&&x.length<40)out.ord=x}});return out}
 function mapSheet(sh){for(let r=0;r<Math.min(sh.rows.length,40);r++){const row=(sh.rows[r]||[]).map(x=>String(x??'').trim());const m={};
-row.forEach((c,i)=>{for(const k in HDR)if(m[k]===undefined&&HDR[k].test(c))m[k]=i});
-let A,B;if(m.len!==undefined&&m.wid!==undefined){A='len';B='wid'}else if(m.wid!==undefined&&m.dep!==undefined){A='wid';B='dep'}else if(m.len!==undefined&&m.dep!==undefined){A='len';B='dep'}
+row.forEach((c,i)=>{for(const k in HDR)if(m[k]===undefined&&HDR[k].test(c)){m[k]=i;break}});
+let A,B;if(m.wid!==undefined&&m.dep!==undefined){A='wid';B='dep'}else if(m.len!==undefined&&m.wid!==undefined){A='len';B='wid'}else if(m.len!==undefined&&m.dep!==undefined){A='len';B='dep'}
 if(!A||m.hei===undefined)continue;
 const out=[];for(let j=r+1;j<sh.rows.length;j++){const x=sh.rows[j]||[];const num=k=>m[k]===undefined?NaN:parseFloat(String(x[m[k]]??'').replace(',','.'));
 const l=num(A),w=num(B),h=num('hei');if(!(l>0&&w>0&&h>0))continue;
-const nm=[m.sym!==undefined?String(x[m.sym]??'').trim():'',m.n!==undefined?String(x[m.n]??'').trim():''].filter(Boolean).join(' – ');
+const nm=[m.sym!==undefined?String(x[m.sym]??'').trim():'',m.n!==undefined?String(x[m.n]??'').trim().split(/\r?\n/)[0].slice(0,40):''].filter(Boolean).filter((v,i,a)=>!(i&&a[0]&&a[0].includes(v))).join(' – ');
 const prev=out[out.length-1];
 if(!nm&&prev&&prev.desk){out.push({n:(prev.base||prev.n)+' – komoda',t:'solid',l,w,h,kg:num('kg')>0?num('kg'):'',q:num('q')>0?Math.round(num('q')):prev.q,fragile:false,side:false,note:''});continue}
 const biurko=/biurk|magnus/i.test(nm),qq=num('q')>0?Math.round(num('q')):1;
-if(biurko&&h>5){const T=1.8,nt='Formatki wyliczone z wymiarów biurka (blat, 2 boki, blenda) – sprawdź i popraw w razie potrzeby.',base=nm.replace(/\s+$/,''),F=(n,a,b,k,last)=>out.push({desk:!!last,base,n:base+' – '+n,t:'flat',l:Math.max(a,b),w:Math.min(a,b),h:T,kg:'',q:qq*k,fragile:false,side:false,note:last?'':nt});
-F('blat',l,w,1);F('bok',w,Math.max(1,h-T),2);F('blenda',Math.max(1,l-2*T),30,1,true);continue}
+if(biurko&&h>5){const T=1.8,tb=num('tb'),TB=tb>5&&tb<=60?tb/10:tb>0&&tb<=6?tb:T,nt='Formatki wyliczone z wymiarów biurka (blat, 2 boki, blenda) – sprawdź i popraw w razie potrzeby.',base=nm.replace(/\s+$/,''),F=(n,a,b,k,last,th)=>out.push({desk:!!last,fixT:1,base,n:base+' – '+n,t:'flat',l:Math.max(a,b),w:Math.min(a,b),h:th||T,kg:'',q:qq*k,fragile:false,side:false,note:last?'':nt});
+F('blat',l,w,1,false,TB);F('bok',w,Math.max(1,h-TB),2);F('blenda',Math.max(1,l-2*T),30,1,true);continue}
 out.push({n:nm,t:h<=5?'flat':'solid',l,w,h,kg:num('kg')>0?num('kg'):'',q:qq,fragile:false,side:false,note:''})}
 if(out.length)return{sheet:sh.name,rows:out,meta:sheetMeta(sh)}}return null}
 function loadSheetJS(){return new Promise((res,rej)=>{if(window.XLSX)return res(window.XLSX);const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=()=>res(window.XLSX);s.onerror=()=>rej(new Error('Brak biblioteki .xls'));document.head.appendChild(s)})}
@@ -702,9 +702,9 @@ try{let sheets;if(/\.csv$/i.test(f.name))sheets=readCsv(await f.text());else if(
 const pr=n=>/^zam/i.test(n)?3:/pacz|pack/i.test(n)?2:/rozkr|optym/i.test(n)?0:1;const ranked=[...sheets].sort((a,b)=>pr(b.name)-pr(a.name));let got=null;for(const sh of ranked){got=mapSheet(sh);if(got&&got.rows.length)break}
 if(!got||!got.rows.length){box.innerHTML='<p class="msg err">Nie znalazłem w pliku kolumn z wymiarami (długość, szerokość, wysokość). Podeślij przykładowy plik – dopasuję import do Waszego formatu.</p>';return}
 const dims=got.rows.flatMap(r=>[r.l,r.w,r.h]).sort((a,b)=>a-b);const med=dims[Math.floor(dims.length/2)];const mm=med>300;
-const conv=got.rows.map(r=>mm?{...r,l:r1(r.l/10),w:r1(r.w/10),h:r1(r.h/10)}:r);
+const conv=got.rows.map(r=>mm?{...r,l:r1(r.l/10),w:r1(r.w/10),h:r.fixT?r.h:r1(r.h/10)}:r);
 setMode('mixed');items=conv;renderItems();setStep(2);const mt=got.meta||{};if(mt.ord&&!$('ordNo').value)$('ordNo').value=mt.ord;if(mt.due&&!$('ordDate').value)$('ordDate').value=mt.due;
-const noKg=0;const nBiu=conv.filter(r=>r.note).length;box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${conv.length}</b> pozycji z arkusza „${esc(got.sheet)}”${mm?' (wymiary przeliczone z mm na cm)':''}${(got.meta||{}).ord?' · zamówienie '+esc(got.meta.ord):''}${(got.meta||{}).due?' · termin '+esc(got.meta.due):''}.${nBiu?` <b style="color:var(--warn)">Biurka (${nBiu}) jadą jako formatki</b> – na razie policzone jako bryły.`:''} Masa brył jest szacowana z płyty (możesz wpisać dokładną).</p>`}
+const noKg=0;const nBiu=conv.filter(r=>r.note&&/blat$/.test(r.n)).length;box.innerHTML=`<p class="msg info">Wczytano <b style="color:var(--tx)">${conv.length}</b> pozycji z arkusza „${esc(got.sheet)}”${mm?' (wymiary przeliczone z mm na cm)':''}${(got.meta||{}).ord?' · zamówienie '+esc(got.meta.ord):''}${(got.meta||{}).due?' · termin '+esc(got.meta.due):''}.${nBiu?` <b style="color:var(--warn)">Biurka (${nBiu}) rozłożone na formatki</b> (blat, 2 boki, blenda) – sprawdź wymiary.`:''} Masa brył jest szacowana z płyty (możesz wpisać dokładną).</p>`}
 catch(e){console.error(e);box.innerHTML='<p class="msg err">Nie udało się odczytać pliku. Zapisz go jako .xlsx albo .csv i spróbuj ponownie.</p>'}}
 $('drop').onclick=()=>$('file').click();$('drop').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file').click()}};
 $('file').onchange=e=>{const f=e.target.files[0];if(f)importFile(f);e.target.value=''};
