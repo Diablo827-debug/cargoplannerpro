@@ -107,6 +107,7 @@ button{cursor:pointer}
 .fl{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 input[type=date]{width:100%;background:var(--card2);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;min-width:0;color:var(--tx);color-scheme:dark}
 .x{background:none;border:none;color:var(--tx3);font-size:20px;padding:2px 6px}
+html.authed #login{display:none!important}
 #login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
 #login form{background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:22px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
 .printonly{display:none}
@@ -142,6 +143,7 @@ body{font-size:15px}.order{font-size:16px!important}.order div{padding:4px 0!imp
 @media print{.foot{color:#555;padding:10px 0 0;font-size:10px}.gds{color:#c56a00;border-color:#c56a00}}
 .appsw{display:flex;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:5px;margin:0 0 12px}.appsw a{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 10px;border-radius:10px;color:var(--tx2);text-decoration:none;font-weight:700;font-size:15px}.appsw a.on{background:var(--orbg);color:var(--or2);box-shadow:inset 0 0 0 1.5px var(--or)}.appsw svg{width:20px;height:20px;flex:none}@media print{.appsw{display:none!important}}
 </style>
+<script>try{if(localStorage.getItem('gds-auth'))document.documentElement.classList.add('authed')}catch(e){}</script>
 <style>
 .drop{border:1.5px dashed var(--tx3);border-radius:12px;padding:14px;text-align:center;color:var(--tx2);cursor:pointer;margin-bottom:12px;font-size:14px}
 .drop.on{border-color:var(--or);background:var(--orbg);color:var(--or2)}
@@ -1093,7 +1095,7 @@ const wrap=s=>({id:s.id,exists:s.exists(),data:()=>s.data()});
 const dref=(p,id)=>{const r=doc(fs,p,id);return{id:r.id,get:async()=>wrap(await getDoc(r)),set:d=>setDoc(r,d),delete:()=>deleteDoc(r)}};
 const coll=(p,c=[])=>({where:(f,op,v)=>coll(p,[...c,where(f,op,v)]),doc:id=>dref(p,id||doc(collection(fs,p)).id),add:async d=>({id:(await addDoc(collection(fs,p),d)).id}),orderBy:(f,dir)=>coll(p,[...c,orderBy(f,dir)]),limit:n=>coll(p,[...c,limit(n)]),onSnapshot:(n,e)=>onSnapshot(query(collection(fs,p),...c),s=>n({docs:s.docs.map(wrap),metadata:s.metadata}),x=>e&&e(x))});
 const $=id=>document.getElementById(id);let started=false;
-onAuthStateChanged(auth,u=>{if(u){$('login').style.display='none';$('logout').hidden=false;if(!started){started=true;window.startDb({collection:p=>coll(p)},{uid:u.uid,email:u.email,multi:true})}}else{$('login').style.display='flex';if(started)location.reload()}});
+onAuthStateChanged(auth,u=>{try{u?localStorage.setItem('gds-auth','1'):localStorage.removeItem('gds-auth')}catch(e){}document.documentElement.classList.toggle('authed',!!u);if(u){$('login').style.display='none';$('logout').hidden=false;if(!started){started=true;window.startDb({collection:p=>coll(p)},{uid:u.uid,email:u.email,multi:true})}}else{$('login').style.display='flex';if(started)location.reload()}});
 let reg=false;
 $('lmode').onclick=()=>{reg=!reg;$('lp2box').hidden=!reg;$('lp2').required=reg;$('lb').textContent=reg?'Załóż konto':'Zaloguj';$('lsub').textContent=reg?'Utwórz konto dla siebie i swojej firmy':'Zaloguj się, aby kontynuować';$('lmode').textContent=reg?'Masz konto? Zaloguj się':'Nie masz konta? Załóż konto';$('lr').hidden=reg;$('lp').autocomplete=reg?'new-password':'current-password';$('lmsg').textContent=''};
 const errPl=c=>({'auth/email-already-in-use':'Konto z tym e-mailem już istnieje. Zaloguj się.','auth/invalid-email':'Nieprawidłowy adres e-mail.','auth/weak-password':'Hasło musi mieć co najmniej 6 znaków.','auth/operation-not-allowed':'Rejestracja jest wyłączona.','auth/too-many-requests':'Zbyt wiele prób. Spróbuj za chwilę.'}[c]);
