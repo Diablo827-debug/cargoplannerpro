@@ -566,7 +566,7 @@ function palletBuild(L,W,cfg){ /* masa i lista cięcia palety z płyty */
 /* Orientacja bryły wg strategii: up = najdłuższy w górę, side = środkowy w górę, flat = najkrótszy w górę */
 function orientSolid(b,strat,Hmax){
   const d=[b.l,b.w,b.h].sort((x,y)=>y-x);
-  const opts={up:[b.l,b.w,b.h],side:[d[0],d[2],d[1]],flat:[d[0],d[1],d[2]]}; /* up = stoi normalnie (wysokość jak w zamówieniu) */
+  const opts={up:[b.l,b.w,b.h],side:[b.h,b.w,b.l],flat:[b.l,b.h,b.w]}; /* stoi: szer×głęb, wys. | na boku: wys×głęb, wys.=szer. | płasko (na plecach): szer×wys, wys.=głęb. */ /* up = stoi normalnie (wysokość jak w zamówieniu) */
   const order=strat==='up'?['up','side','flat']:strat==='side'?['side','flat','up']:['flat','side','up'];
   for(const k of order){const o=opts[k];if(o[2]<=Hmax+1e-9)return{...b,l:o[0],w:o[1],h:o[2],pose:k,side:false}}
   return{...b,l:opts.flat[0],w:opts.flat[1],h:opts.flat[2],pose:'flat',side:false};
@@ -876,10 +876,10 @@ bs.forEach((b,k)=>boxes.push({id:'us'+key+'_'+k,g:b.g,n:key+(bs.length>1?' – p
 else for(let i=0;i<items.length;i++){const it=items[i];const l=+it.l,w=+it.w,h=+it.h,q=Math.round(+it.q||0);
 if(!(l>0&&w>0&&h>0&&q>0)){msg(`Uzupełnij wymiary i ilość pozycji ${esc(it.n||LETTERS[i]||i+1)}.`);return}
 const nm=it.n||(isFlat(it)?'Formatka ':'Mebel ')+(LETTERS[i]||i+1),kg1=kgOf(it),flat=isFlat(it);
-for(let k=0;k<q;k++)plain.push({id:i+'_p'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:poseOv[i+'_p'+k]||it.pose||''});
+for(let k=0;k<q;k++)plain.push({id:i+'_p'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:poseOv[i+'_p'+k]||poseOv[i+'_'+k]||poseOv['g'+i]||it.pose||''});
 if(flat&&!it.fragile&&q>1){const maxPer=Math.max(1,Math.min(Math.floor(Hst/h+1e-9),kg1>0?Math.floor(kgCap/kg1+1e-9):1e9));const ns=Math.ceil(q/maxPer);let left=q;
-for(let s2=0;s2<ns;s2++){const c=Math.ceil(left/(ns-s2));left-=c;boxes.push({id:i+'_s'+s2,g:i,n:nm,l,w,h:r1(h*c*1000)/1000,kg:kg1*c,cnt:c,ph:h,flat:true,solid:false,fragile:false,side:false,fix:poseOv[i+'_s'+s2]||it.pose||''})}}
-else for(let k=0;k<q;k++)boxes.push({id:i+'_'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:poseOv[i+'_'+k]||it.pose||''})}
+for(let s2=0;s2<ns;s2++){const c=Math.ceil(left/(ns-s2));left-=c;boxes.push({id:i+'_s'+s2,g:i,n:nm,l,w,h:r1(h*c*1000)/1000,kg:kg1*c,cnt:c,ph:h,flat:true,solid:false,fragile:false,side:false,fix:poseOv[i+'_s'+s2]||poseOv['g'+i]||it.pose||''})}}
+else for(let k=0;k<q;k++)boxes.push({id:i+'_'+k,g:i,n:nm,l,w,h,kg:kg1,cnt:1,flat,solid:!flat,fragile:!!it.fragile,side:!flat&&!!it.side,fix:poseOv[i+'_'+k]||poseOv['g'+i]||it.pose||''})}
 if(!boxes.length){msg('Dodaj przynajmniej jedną pozycję.');return}if(boxes.length>400){msg('Maksymalnie 400 pozycji w jednym planie.');return}
 const ms=Math.min(4500,custom?1500+boxes.length*30:1200+boxes.length*25);const t0=Date.now();const tick=setInterval(()=>bar.style.width=Math.min(95,(Date.now()-t0)/ms*100)+'%',100);
 await new Promise(r=>setTimeout(r,20));res=custom?PalletEngine.solveCustom(boxes,C,{ms,alts:plain.length&&plain.length!==boxes.length&&plain.length<=80?[plain]:[]}):PalletEngine.solveMixed(boxes,P,{ms});clearInterval(tick);
@@ -942,7 +942,7 @@ ctx.fillText((window.T||String)(`Wysokość z paletą: ${r1(top+(P.ph||0))} cm �
 function hull2(P){P=P.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];for(const p of P){while(lo.length>1&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p)}for(const p of P.reverse()){while(up.length>1&&cr(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p)}return lo.slice(0,-1).concat(up.slice(0,-1))}
 function inPoly(x,y,H){let c=false;for(let i=0,j=H.length-1;i<H.length;j=i++){const[a,b]=H[i],[d,e]=H[j];if((b>y)!==(e>y)&&x<(d-a)*(y-b)/(e-b)+a)c=!c}return c}
 /* ---------- KLIKNIJ MEBEL → ZMIEŃ USTAWIENIE ---------- */
-let poseOv={};
+let poseOv={},poseWant=null;
 function pickAt(cvs,ev){const r=cvs.getBoundingClientRect(),x=(ev.clientX-r.left)*cvs.width/r.width,y=(ev.clientY-r.top)*cvs.height/r.height;const H=cvs.__hit||[];for(let k=H.length-1;k>=0;k--)if(inPoly(x,y,H[k].hull))return H[k].i;return -1}
 function openPose(pi,ev){const r=result;if(!r||!r.custom||r.dest==='US')return;const b=r.pallets[curPal].placed[pi];if(!b)return;const it=items[b.g];if(!it)return;
 const fl=!b.s&&!isSolidItem(it),num=orderNumbers(r.pallets[curPal])[pi],cur=poseOv[b.id]||it.pose||'auto',same=r.pallets.reduce((a,p)=>a+p.placed.filter(q=>q.g===b.g).length,0);
@@ -952,8 +952,15 @@ const el=$('posePop');el.innerHTML=`<div class="pph"><b>${num}. ${esc(b.n)}</b><
 ${same>1?`<label class="tog" style="margin-top:10px"><input type="checkbox" id="ppAll"> Ustaw tak wszystkie „${esc(it.n||'')}” (${same} szt.)</label>`:''}`;
 el.hidden=false;$('ppX').onclick=()=>el.hidden=true;
 el.querySelectorAll('[data-pp]').forEach(btn=>btn.onclick=async()=>{const v=btn.dataset.pp;el.hidden=true;
-if($('ppAll')&&$('ppAll').checked){it.pose=v==='auto'?'':v;Object.keys(poseOv).forEach(k=>{if(k.split('_')[0]===String(b.g))delete poseOv[k]})}else{if(v==='auto')delete poseOv[b.id];else poseOv[b.id]=v}
-renderItems();const keep=curPal;await calculate();if(result&&keep<result.pallets.length){curPal=keep;showResult()}})}
+if($('ppAll')&&$('ppAll').checked){it.pose=v==='auto'?'':v;Object.keys(poseOv).forEach(k=>{if(k.split('_')[0]===String(b.g))delete poseOv[k]})}else{const key=/_s\d+$/.test(b.id)||!b.id?'g'+b.g:b.id;if(v==='auto')delete poseOv[key];else poseOv[key]=v}
+poseWant={id:b.id||'',g:b.g,v,n:b.n,all:!!($('ppAll')&&$('ppAll').checked)}
+renderItems();const keep=curPal;await calculate();if(result&&keep<result.pallets.length){curPal=keep;showResult()}checkPose()})}
+function checkPose(){const w=poseWant;poseWant=null;if(!w||!result||w.v==='auto')return;const all=result.pallets.flatMap(p=>p.placed);const per=w.id&&!w.all&&!/_s\d+$/.test(w.id),pid=w.id.replace(/_(\d+)$/,'_p$1');const L=all.filter(q=>per?(q.id===w.id||q.id===pid):q.g===w.g);
+const want=w.v,bad=L.filter(q=>q.pose!==want&&!(want==='up'&&q.pose==='up'));if(!bad.length){msg('');return}
+const q=bad[0],it=items[q.g]||{},d=[+it.l,+it.w,+it.h].sort((a,b)=>b-a),C=custCfg(),Hl=(C.maxH||220)-(C.palH||15);
+const needH=want==='upright'?Math.min(d[0],d[1]):want==='side'?d[1]:want==='flat'?d[2]:+it.h;
+const why=needH>Hl?`w tym ustawieniu ma ${needH} cm wysokości, a limit ładunku to ${Hl} cm (${C.maxH} cm z paletą)`:`nie mieści się w dopuszczalnym obrysie palety`;
+const t=`Nie da się ustawić „${esc(w.n)}” ${POSE[want]||want}: ${why}. Zostawiłem ustawienie, które się mieści.`;msg(t,'warn');const el=$('posePop');el.innerHTML=`<div class="pph"><b style="color:var(--warn)">Nie da się</b><button class="x" onclick="this.closest('.posepop').hidden=true" aria-label="Zamknij">×</button></div><div style="font-size:14px;margin-top:4px">${t}</div>`;el.hidden=false}
 function isSolidItem(it){return!isFlat(it)}
 function orderNumbers(pl){const idx=pl.placed.map((b,i)=>i).sort((a,b)=>{const A=pl.placed[a],B=pl.placed[b];const up=q=>q.pose==='upright'&&!q.s;return A.z-B.z||(A.z<1e-6?(up(B)-up(A))||(up(A)&&up(B)?B.h-A.h:0):0)||A.x-B.x||A.y-B.y});const m={};idx.forEach((i,k)=>m[i]=k+1);return m}
 const cv=$('cv');let drag=null;
