@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-title" content="Cargo Planner"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
 <script>try{if(localStorage.getItem('gds-auth'))document.documentElement.classList.add('authed')}catch(e){}</script>
+<script>/* jeden adres: zapamiętana zakładka Palety w tej karcie */try{if(sessionStorage.getItem('gds-view')==='pal')location.replace('/paleta/'+location.search);else sessionStorage.setItem('gds-view','cars')}catch(e){}</script>
 <style>
 :root{--bg:#0b111b;--panel:#121b28;--card:#182334;--card2:#1f2c40;--tx:#eef2f7;--tx2:#9babbf;--tx3:#6f7f94;--bd:#2a3a50;--or:#f7931e;--or2:#ff9f2e;--orbg:#3a250f;--ok:#58d26a;--okbg:#14301c;--okbd:#2f9a45;--bad:#ff7b7b;--badbg:#3b1a1f;--warn:#ffbf5e;--warnbg:#3a2a12;--r:14px;color-scheme:dark}
 *{box-sizing:border-box}
@@ -161,7 +162,7 @@ body{font-size:15px}.order{font-size:16px!important}.order div{padding:4px 0!imp
 <div><h1>Cargo Planner <em>Pro</em> <span class="gds">GDS</span></h1><p>Planer załadunku · Dobór pojazdu · Plan ustawienia · Masa ładunku</p></div>
 <div class="user"><button class="btn sm or" id="install" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Zainstaluj</button><span id="who"></span><button class="iconbtn" id="logout" title="Wyloguj" aria-label="Wyloguj" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></button></div>
 </header>
-<nav class="appsw" aria-label="Aplikacje"><a href="/" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 6h12v10H2zM14 9h4l3 4v3h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Auta</a><a href="/paleta/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18h18M5 18v2M12 18v2M19 18v2"/><rect x="4" y="11" width="7" height="7"/><rect x="13" y="11" width="7" height="7"/><rect x="8" y="4" width="8" height="7"/></svg>Palety</a></nav>
+<nav class="appsw" aria-label="Aplikacje"><a href="/" class="on" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 6h12v10H2zM14 9h4l3 4v3h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Auta</a><a href="/paleta/" onclick="try{sessionStorage.setItem('gds-view','pal')}catch(e){}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 18h18M5 18v2M12 18v2M19 18v2"/><rect x="4" y="11" width="7" height="7"/><rect x="13" y="11" width="7" height="7"/><rect x="8" y="4" width="8" height="7"/></svg>Palety</a></nav>
 
 <p class="msg info" id="installHelp" hidden style="margin:0 0 12px">Na iPhonie/iPadzie: otwórz w Safari, stuknij <b>Udostępnij</b> → <b>Do ekranu początkowego</b>. Na komputerze: w Chrome lub Edge kliknij ikonę instalacji po prawej stronie paska adresu.</p>
 <div class="cobar" id="coBar" hidden>
