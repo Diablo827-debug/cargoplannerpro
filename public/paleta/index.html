@@ -813,9 +813,9 @@ renderBatch();if(keep.on>=0)openBatch(keep.on);result=keep.result;curPal=keep.cu
 document.body.classList.add('bprint');const done=()=>{document.body.classList.remove('bprint');out.innerHTML='';removeEventListener('afterprint',done)};addEventListener('afterprint',done);
 setTimeout(()=>{try{window.print()}catch(e){done();sm.innerHTML='<p class="msg err">Drukowanie nie działa w tym widoku.</p>'}},250)}
 async function ensureRes(b){if(b.res)return b.res;const i=batch.indexOf(b);openBatch(i);result=null;quiet=true;try{await calculate()}finally{quiet=false}b.res=result;return result}
-async function printLabels(){const sel=batch.filter(b=>b.sel);const sm=$('saveMsg');if(!sel.length){sm.innerHTML='<p class="msg err">Zaznacz zamówienia.</p>';return}if(running)return;
+async function printLabels(list){const fromList=Array.isArray(list);const sel=fromList?list:batch.filter(b=>b.sel);const sm=$('saveMsg');if(!sel.length){sm.innerHTML='<p class="msg err">Zaznacz zamówienia.</p>';return}if(running)return;
 const keep={result,curPal,on:batch.findIndex(b=>b.on)};const rows=[];
-for(const b of sel){const r=await ensureRes(b);if(!r||!r.custom)continue;r.pallets.forEach((p,k)=>rows.push({b,r,p,k,n:r.pallets.length}))}
+for(const b of sel){const r=fromList?b.res:await ensureRes(b);if(!r||!r.custom)continue;r.pallets.forEach((p,k)=>rows.push({b,r,p,k,n:r.pallets.length}))}
 renderBatch();if(keep.on>=0)openBatch(keep.on);result=keep.result;curPal=keep.curPal;if(result)showResult();
 if(!rows.length){sm.innerHTML='<p class="msg err">Brak palet z płyty do wydruku.</p>';return}
 const today=new Date().toLocaleDateString('pl-PL'),D={PL:'POLSKA',ES:'HISZPANIA',US:'USA'};const isPar=x=>x.r.cfg&&x.r.cfg.parcel;
@@ -1037,8 +1037,16 @@ currentPlanId=id;currentPlanName=x.name||'';$('planName').value=x.name||'';$('sa
 function renderSaved(){const box=$('savedList');$('savedHint').textContent=savedDocs.length+' zapisanych'+(multi&&typeof curCo==='function'&&curCo()?' · '+curCo().name:'');
 if(!savedDocs.length){box.innerHTML='<p class="muted" style="margin:0">Nie ma jeszcze zapisanych planów.</p>';return}
 box.innerHTML=savedDocs.map(d=>{const x=d.data()||{};const n=(x.pallets||[]).reduce((a,p)=>a+(p.placed||[]).reduce((q,b)=>q+(b.c||1),0),0);const dt=x.updatedAt?new Date(x.updatedAt).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'}):'';const who=String(x.updatedByName||'').split('@')[0];const due=x.due?new Date(x.due+'T00:00').toLocaleDateString('pl-PL'):'';
-return`<div class="it"><div class="t"><b>${esc(x.name)}</b><span>${x.ord?'zl. '+esc(x.ord)+' · ':''}${due?'termin '+esc(due)+' · ':''}${(x.pallets||[]).length} pal. · ${n} szt. · ${dt}${who?' · '+esc(who):''}</span></div><button class="btn sm" data-open="${esc(d.id)}">Otwórz</button><button class="x" data-delplan="${esc(d.id)}" aria-label="Usuń plan">×</button></div>`}).join('')}
+return`<div class="it"><input type="checkbox" class="psel" data-psel="${esc(d.id)}"${savedSel.has(d.id)?' checked':''} aria-label="Zaznacz plan" style="width:22px;height:22px;flex:none;accent-color:var(--or)"><div class="t"><b>${esc(x.name)}</b><span>${x.ord?'zl. '+esc(x.ord)+' · ':''}${due?'termin '+esc(due)+' · ':''}${(x.pallets||[]).length} pal. · ${n} szt. · ${dt}${who?' · '+esc(who):''}</span></div><button class="btn sm" data-open="${esc(d.id)}">Otwórz</button><button class="x" data-delplan="${esc(d.id)}" aria-label="Usuń plan">×</button></div>`}).join('')+`<div style="margin-top:10px"><label class="ball"><input type="checkbox" id="pAll"${savedDocs.length&&savedDocs.every(d=>savedSel.has(d.id))?' checked':''}> Zaznacz wszystkie</label>
+<button class="btn or" id="pLoad" style="width:100%;margin-top:6px"${savedSel.size?'':' disabled'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 6h12v10H2zM14 9h4l3 4v3h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Zaplanuj załadunek na auto (${savedSel.size})</button>
+<button class="btn" id="pLab" style="width:100%;margin-top:8px"${savedSel.size?'':' disabled'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>Palety na dziś – etykiety 150×100 (${savedSel.size})</button></div>`;
+$('pAll').onchange=e=>{savedDocs.forEach(d=>e.target.checked?savedSel.add(d.id):savedSel.delete(d.id));renderSaved()};
+$('pLoad').onclick=()=>{const L=selSaved();const pallets=[],ords=[];L.forEach(x=>{ords.push(String(x.ord));x.res.pallets.forEach(p=>pallets.push(custPal(x.res,p,x.ord)))});sendToCar(pallets,ords)};
+$('pLab').onclick=()=>printLabels(selSaved())}
+const savedSel=new Set();
+function selSaved(){return savedDocs.filter(d=>savedSel.has(d.id)).map(d=>{const x=d.data()||{};return{ord:x.ord||x.name||'—',due:x.due?new Date(x.due+'T00:00').toLocaleDateString('pl-PL'):'',res:{custom:!!x.custom,cfg:x.cfg||null,P:x.P||null,dest:x.dest||'',pallets:x.pallets||[]}}}).filter(x=>x.res.pallets.length)}
 function armDelete(btn,fn){if(btn.dataset.armed){fn();return}btn.dataset.armed='1';btn.textContent='Usuń?';btn.style.fontSize='13px';btn.style.color='var(--bad)';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent='×';btn.style.fontSize='';btn.style.color=''}},3000)}
+$('savedList').addEventListener('change',e=>{const c=e.target.closest('[data-psel]');if(c){c.checked?savedSel.add(c.dataset.psel):savedSel.delete(c.dataset.psel);renderSaved()}});
 $('savedList').addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){const d=savedDocs.find(x=>x.id===o.dataset.open);if(d)loadPlan(d.data(),d.id);return}
 const del=e.target.closest('[data-delplan]');if(del)armDelete(del,async()=>{try{await db.collection(P('stacks')).doc(del.dataset.delplan).delete();if(currentPlanId===del.dataset.delplan){currentPlanId=null;currentPlanName=''}}catch(err){}})});
 
