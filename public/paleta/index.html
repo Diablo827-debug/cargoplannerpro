@@ -599,6 +599,8 @@ function solveCustom(boxes,cfg,opts={}){
     const bx=boxes.map(b=>b.solid?orientSolid(b,b.fix&&b.fix!=='auto'?b.fix:st,Hload):(b.fix==='flat'?{...b,side:false,pose:'flat'}:b.fix==='upright'?orientPanel(b,Hload):b.fix==='edge'?(()=>{const d=[b.l,b.w].sort((x,y)=>y-x);return d[1]<=Hload+1e-9?{...b,l:d[0],w:b.h,h:d[1],pose:'upright',edge:true,side:false}:{...b,pose:'flat',side:false}})():((cfg.panelUp===false||cfg.dest==='ES')?{...b,side:false,pose:'flat'}:orientPanel(b,Hload))));
     const VOL=bx.reduce((s,b)=>s+b.l*b.w*b.h,0),hEst=(L,W)=>D.us?Math.min(Hload,Math.max(...bx.map(b=>b.h)),VOL/Math.max(1,L*W))*1+Math.min(Hload,VOL/Math.max(1,L*W))*0:Hload;
     const BXV=[bx,bx.map(b=>b.solid?{...b,l:b.w,w:b.l}:b)]; /* dwa warianty obrotu mebli – greedy inaczej układa rzędy */
+    /* małe lekkie meble (np. kontenerki ≤ tinyKg): wariant „położone na boku” – wtedy wolno je piętrować jeden na drugim */
+    {const tk=cfg.tinyKg||0;const tiny=b=>b.solid&&!(b.fix&&b.fix!=='auto')&&b.pose==='up'&&(b.kg||0)<=tk+1e-9;if(tk&&bx.filter(tiny).length>=2){const bt=bx.map(b=>tiny(b)?{...orientSolid(b,'side',Hload)}:b);BXV.push(bt,bt.map(b=>b.solid?{...b,l:b.w,w:b.l}:b))}}
     const mL=Math.max(...bx.map(b=>Math.max(b.l,b.w))),mW=Math.max(...bx.map(b=>Math.min(b.l,b.w)));
     const shrink=(pl)=>{
         const mx=Math.max(...pl.placed.map(q=>q.x+q.l)),my=Math.max(...pl.placed.map(q=>q.y+q.w)),top=topOf(pl);
