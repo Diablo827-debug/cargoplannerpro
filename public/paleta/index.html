@@ -247,7 +247,7 @@ body{font-size:18px}#levels{grid-template-columns:repeat(2,minmax(0,1fr))!import
 <div><label class="lbl" for="cMin">Najmniejsza paleta (cm)</label><div class="row" style="flex-wrap:nowrap"><input type="number" id="cMinL" value="80"><span class="muted">×</span><input type="number" id="cMinW" value="80"></div></div>
 <div><label class="lbl" for="cMinS">Najmniejsza paleta PL – mała (cm)</label><div class="row" style="flex-wrap:nowrap"><span class="muted">80 ×</span><input type="number" id="cMinS" value="60"></div></div>
 <div><label class="lbl" for="cTinyL">Pojedynczy mały mebel PL – paleta (cm)</label><div class="row" style="flex-wrap:nowrap"><input type="number" id="cTinyL" value="60"><span class="muted">×</span><input type="number" id="cTinyW" value="50"></div></div>
-<div><label class="lbl" for="cTinyKg">…jeśli waży do (kg) – takie małe meble wolno też piętrować</label><input type="number" id="cTinyKg" value="30"></div>
+<div><label class="lbl" for="cTinyKg">…jeśli waży do (kg)</label><input type="number" id="cTinyKg" value="30"></div>
 <div><label class="lbl" for="mPL">Stopery Polska (cm)</label><input type="number" id="mPL" value="10"></div>
 <div><label class="lbl" for="mES">Stopery Hiszpania (cm)</label><input type="number" id="mES" value="20"></div>
 <div><label class="lbl" for="pPL">Opakowanie Polska (kg)</label><input type="number" id="pPL" value="20"></div>
@@ -626,12 +626,12 @@ function solveCustom(boxes,cfg,opts={}){
       const est=cb(SL,SW,D.us?Math.min(Hload,Math.max(...bx.map(b=>b.h))):Hload);const goods=maxKg-D.pack-est.kg;
       const st5=v=>Math.ceil(v/5)*5;const stp=5;const Ls=[...new Set([Math.max(mL,minL-margin),...Array.from({length:60},(_,i)=>st5(Math.max(mL,minL-margin))+stp*i)])].filter(v=>v<=SL-(D.loadLim?0:margin)+1e-9);const Ws=[...new Set([Math.max(mW,minW-margin),...Array.from({length:40},(_,i)=>st5(Math.max(mW,minW-margin))+stp*i)])].filter(v=>v<=SW-(D.loadLim?0:margin)+1e-9);
       for(const Lc of Ls)for(const Wc of Ws){if(Wc>Lc+1e-9)continue;
-        const P={L:Lc,W:Wc,H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false,stackKg:cfg.tinyKg||0};
+        const P={L:Lc,W:Wc,H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false};
         const estC=cb(Math.max(minL,Lc+margin),Math.max(minW,Wc+margin),D.us?Math.min(Hload,D.parcel?Math.min(...bx.map(b=>b.h)):Math.max(Math.max(...bx.map(b=>b.h)),VOL/(Lc*Wc))):Hload);P.maxKg=maxKg-D.pack-estC.kg;
         for(const cp of [true,false])for(const B of BXV){const Pc={...P,compact:cp};const r=packAll(customOrder(B),Pc,new Map());cands.push({P:Pc,B,ev:evalRes(r,[SL,SW])})}
       }
       /* zawsze także pełny obrys (gdy pojedynczy element jest bardzo duży) */
-      const Pm={L:SL-(D.loadLim?0:margin),W:SW-(D.loadLim?0:margin),H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false,stackKg:cfg.tinyKg||0};
+      const Pm={L:SL-(D.loadLim?0:margin),W:SW-(D.loadLim?0:margin),H:Hload,over:0,maxKg:goods,support:cfg.support??0.75,heavyDown:cfg.heavyDown!==false,compact:true,noSolidStack:cfg.noSolidStack!==false};
       if(Pm.L>0&&Pm.W>0)for(const cp of [true,false]){const Pc={...Pm,compact:cp};cands.push({P:Pc,ev:evalRes(packAll(customOrder(bx),Pc,new Map()),[SL,SW])})}
     }
     const cmp0=(a,b)=>a.ev.score[0]-b.ev.score[0]||a.ev.score[1]-b.ev.score[1]||a.ev.score[2]-b.ev.score[2]||a.ev.score[3]-b.ev.score[3];
@@ -1205,7 +1205,7 @@ const Lm=L-margin,Wm=W-margin,Hl=T-ph-2*wall;
 const P={L:Lm,W:Wm,H:Hl,over:0,maxKg:(c.maxKg||400)-(D.us?0:(D.pack||0))-E.palletBuild(L,W,{...c,deckMm:D.deck||18}).kg,support:c.support??0.75,heavyDown:c.heavyDown!==false,compact:true};
 const strats=D.us?['flat']:lvl>=2?['up','side','flat']:['up'],pmodes=D.us?['flat']:(r.dest==='ES'?['flat']:['upright','flat']);const out=[];
 for(let rep=0;rep<(reps||1);rep++)for(const st of strats)for(const pm of pmodes){const bx=base.map(b=>b.solid?E.orientSolid(b,b.fix&&b.fix!=='auto'?b.fix:st,Hl):(b.fix==='flat'||(!b.fix&&pm==='flat')?{...b,pose:'flat'}:b.fix==='edge'?(()=>{const d=[b.l,b.w].sort((x,y)=>y-x);return{...b,l:d[0],w:b.h,h:d[1],pose:'upright',edge:true}})():E.orientPanel(b,Hl)));
-const rr=E.solveMixed(bx,{...P,noSolidStack:lvl<1,stackKg:c.tinyKg||0},{ms});const first=rr.pallets[0]||{placed:[]};const used=new Set(first.placed.map(q=>q.id));const left=bx.length-first.placed.length;const top=first.placed.reduce((a,q)=>Math.max(a,q.z+q.h),0);
+const rr=E.solveMixed(bx,{...P,noSolidStack:lvl<1},{ms});const first=rr.pallets[0]||{placed:[]};const used=new Set(first.placed.map(q=>q.id));const left=bx.length-first.placed.length;const top=first.placed.reduce((a,q)=>Math.max(a,q.z+q.h),0);
 const stacked=first.placed.filter(q=>q.solid&&q.z>1e-6).length,moved=first.placed.filter(q=>q.solid&&!q.fix&&q.pose!=='up').length;
 out.push({sc:[left,stacked,moved,top],first,left,top,lvl,rest:bx.filter(b=>!used.has(b.id))})}return out}
 const scLess=(a,b)=>{for(let i=0;i<a.length;i++){if(Math.abs(a[i]-b[i])>1e-6)return a[i]<b[i]}return false};
