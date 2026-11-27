@@ -16,7 +16,7 @@ const hidden = process.argv.includes('--hidden');
 
 // ---------- ustawienia ----------
 const SET_FILE = () => path.join(app.getPath('userData'), 'settings.json');
-const DEF = { folder: '', recursive: true, nightlyOn: false, time: '20:00', daysAhead: 2, pdfFolder: '', autostart: false, lastRunDay: '', lastRun: null, hideOnClose: true };
+const DEF = { folder: '', recursive: true, nightlyOn: false, time: '20:00', daysAhead: 7, autoPrint: false, printerLabels: '', printerA4: '', pdfFolder: '', autostart: false, lastRunDay: '', lastRun: null, hideOnClose: true };
 let S = { ...DEF };
 function loadSet() { try { S = { ...DEF, ...JSON.parse(fs.readFileSync(SET_FILE(), 'utf8')) } } catch (e) { S = { ...DEF } } }
 function saveSet() { try { fs.mkdirSync(path.dirname(SET_FILE()), { recursive: true }); fs.writeFileSync(SET_FILE(), JSON.stringify(S, null, 2)) } catch (e) { console.error(e) } }
@@ -112,7 +112,7 @@ function createTray() {
 // ---------- funkcje dla strony ----------
 handle('cpp:getSettings', () => ({ ...S, version: app.getVersion() }));
 handle('cpp:setSettings', (o) => {
-  const keys = ['recursive', 'nightlyOn', 'time', 'daysAhead', 'autostart', 'hideOnClose'];
+  const keys = ['recursive', 'nightlyOn', 'time', 'daysAhead', 'autostart', 'hideOnClose', 'autoPrint', 'printerLabels', 'printerA4'];
   for (const k of keys) if (o && k in o) S[k] = o[k];
   if (o && 'time' in o && /^\d{1,2}:\d{2}$/.test(o.time)) { const now = new Date(), [h, m] = o.time.split(':').map(Number), d = new Date(now); d.setHours(h, m, 0, 0); if (d > now) S.lastRunDay = '' }
   saveSet(); applyAutostart(); lastSig = ''; pollFolder(); return { ...S };
@@ -133,6 +133,15 @@ handle('cpp:savePdf', async (name) => {
   const p = path.join(S.pdfFolder, safe.endsWith('.pdf') ? safe : safe + '.pdf');
   fs.writeFileSync(p, data); return p;
 });
+handle('cpp:printers', async () => { try { return (await win.webContents.getPrintersAsync()).map(p => ({ name: p.name, displayName: p.displayName || p.name, isDefault: !!p.isDefault })) } catch (e) { return [] } });
+// druk bez okienka: etykiety → drukarka termiczna, ułożenie palet → drukarka A4
+handle('cpp:printSilent', (kind) => new Promise(res => {
+  const deviceName = kind === 'labels' ? S.printerLabels : S.printerA4;
+  const opt = { silent: true, printBackground: true, margins: { marginType: 'none' } };
+  if (deviceName) opt.deviceName = deviceName;
+  if (kind !== 'labels') opt.pageSize = 'A4';
+  try { win.webContents.print(opt, (ok, err) => res({ ok, err: err || '' , printer: deviceName || '(domyślna)' })) } catch (e) { res({ ok: false, err: String(e) }) }
+}));
 handle('cpp:openPath', (p) => { if (p && (insideFolder(p) || (S.pdfFolder && path.resolve(p).startsWith(path.resolve(S.pdfFolder))))) shell.openPath(p) });
 handle('cpp:nightlyDone', (info) => {
   nightlyBusy = false; S.lastRun = { at: Date.now(), ...(info || {}) }; saveSet();

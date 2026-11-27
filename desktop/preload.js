@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('gdsDesktop', {
   listFolder: () => call('cpp:listFolder'),
   readFile: (p) => call('cpp:readFile', p),
   savePdf: (name) => call('cpp:savePdf', name),
+  printers: () => call('cpp:printers'),
+  printSilent: (kind) => call('cpp:printSilent', kind),
   openPath: (p) => call('cpp:openPath', p),
   nightlyDone: (info) => call('cpp:nightlyDone', info),
   runNow: () => call('cpp:runNow'),
