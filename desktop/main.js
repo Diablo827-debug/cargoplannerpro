@@ -139,7 +139,9 @@ handle('cpp:printSilent', (kind) => new Promise(res => {
   const deviceName = kind === 'labels' ? S.printerLabels : S.printerA4;
   const opt = { silent: true, printBackground: true, margins: { marginType: 'none' } };
   if (deviceName) opt.deviceName = deviceName;
-  if (kind !== 'labels') opt.pageSize = 'A4';
+  // zawsze dokładnie rozmiar strony: etykieta 100×150 mm w pionie albo A4 – treść dopasowana, bez skalowania sterownika
+  if (kind === 'labels') { opt.pageSize = { width: 100000, height: 150000 }; opt.landscape = false } else opt.pageSize = 'A4';
+  opt.scaleFactor = 100;
   try { win.webContents.print(opt, (ok, err) => res({ ok, err: err || '' , printer: deviceName || '(domyślna)' })) } catch (e) { res({ ok: false, err: String(e) }) }
 }));
 handle('cpp:openPath', (p) => { if (p && (insideFolder(p) || (S.pdfFolder && path.resolve(p).startsWith(path.resolve(S.pdfFolder))))) shell.openPath(p) });
