@@ -455,7 +455,7 @@ function fillPallet(order,P,pref){
             if(Math.abs(q.z+q.h-z)>1e-6)continue;
             const a=ov(x,x+l,q.x,q.x+q.l)*ov(y,y+w,q.y,q.y+q.w);
             if(a<=0)continue;
-            if(q.fragile||q.pose==='upright'||(P.noSolidStack&&b.solid&&q.solid&&q.pose==='up'&&!(P.stackKg&&(b.kg||0)<=P.stackKg+1e-9&&(q.kg||0)<=P.stackKg+1e-9))){bad=true;break} /* nic na delikatnej ani na krawędziach formatek na sztorc */
+            if(q.fragile||q.pose==='upright'||(P.noSolidStack&&b.solid&&q.solid&&q.pose==='up'&&!(P.stackKg&&(b.kg||0)<=P.stackKg+1e-9&&(q.kg||0)<=P.stackKg+1e-9)&&!(/kontener/i.test(b.n||'')&&/kontener/i.test(q.n||'')))){bad=true;break} /* nic na delikatnej ani na krawędziach formatek na sztorc */
             if(P.heavyDown&&!q.flat&&q.h>(P.solidH??5)&&b.kg>q.kg+1e-9){bad=true;break} /* cięższa nie na lżejszej paczce (płaskie formatki ≤5 cm są pełne i nośne) */
             area+=a;
           }
@@ -835,7 +835,10 @@ if(deskT.test(txt)&&!/_(KR|KD|SB|SU|NW|RG|SZ)_/i.test(code)&&!/^(kontener|komod|
  const LT=T>3.6?1.8:T,nt='Formatki wyliczone z wymiarów (blat, 2 boki, blenda) – sprawdź i popraw w razie potrzeby.',base=nm,
  F=(n,a,b,k,th,last)=>it({desk:!!last,fixT:1,base,n:base+' – '+n,t:'flat',l:r1(Math.max(a,b)),w:r1(Math.min(a,b)),h:th,q:qq*k,note:n==='blat'?nt:''});
  const hb=Math.min(!(l2>0)&&h2>0&&h2<h?h2:36,Math.max(5,h-T-2));
- F('blat',l,w,1,T);F('bok',w-0.4,Math.max(1,h-T),2,LT);F('blenda',Math.max(5,l-2*LT-1),hb,1,1.8,!(l2>0));
+ /* biurka z kontenerami zamiast nóg: MARON, FELIX, ELTON, JASPER, RONALD, SIMON – 2 kontenery; NATAL, LUCAS, ORSON, KRIS, PORTER – 1 kontener */
+ const nK=/\b(maron|felix|elton|jasper|ronald|simon)\b/i.test(txt+' '+base)?2:/\b(natal|lucas|orson|kris|porter)\b/i.test(txt+' '+base)?1:0;
+ F('blat',l,w,1,T);if(2-nK>0)F('bok',w-0.4,Math.max(1,h-T),2-nK,LT);F('blenda',Math.max(5,l-2*LT-1),hb,1,1.8,!(l2>0)&&!nK);
+ if(nK){/* kontener: wysokość jak noga, szer. ok. 40 cm; kontenery stawiamy jeden na drugim */const kl=l2>0&&l2<=80?l2:40,kd=w2>0?w2:Math.max(30,w-10),kh=h2>0&&h2<h?h2:Math.max(5,h-T);it({desk:true,base,n:base+' – kontener',t:'solid',l:kl,w:kd,h:kh,fixT:1,q:qq*nK,kont:true});continue}
  if(l2>0){const d2=w2>0?w2:Math.max(30,w-10),hh=h2>0&&h2<h?h2:Math.max(5,h-T);/* komoda biurka (Magnus) do 200 cm szer. → zawsze na boku, jak najwyżej w pionie */it({desk:true,base,n:base+' – '+(w2>0||h2>0?'komoda':'kontener'),t:'solid',l:l2,w:d2,h:hh,fixT:1,...((w2>0||h2>0)&&l2<=200?{pose:'side'}:{})})}
  continue}
 it({n:nm,t:h<=5?'flat':'solid',l,w,h,kg});if(l2>0&&w2>0&&h2>0)it({n:nm+' – moduł 2',t:'solid',l:l2,w:w2,h:h2})}
