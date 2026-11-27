@@ -1364,13 +1364,14 @@ Promise.resolve(fn()).then(()=>setTimeout(()=>fin(null),20000),()=>fin(null))})}
 async function dkNightly(o){const days=Math.max(1,+(o&&o.daysAhead)||+dkSet.daysAhead||7);const t0=new Date();t0.setHours(0,0,0,0);
 const ymd=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)};const from=new Date(t0.getTime()+86400000),to=new Date(t0.getTime()+days*86400000);const F=ymd(from),Tt=ymd(to);
 let msg='';try{for(let w=0;running&&w<120;w++)await new Promise(r=>setTimeout(r,1000));
-const files=(await DK.listFolder()).filter(f=>f.mtime>Date.now()-150*86400000);const pick=[];
-for(const f of files){const m=await dkMetaOf(f);if(m.due&&m.due>=F&&m.due<=Tt)pick.push({f,m})}
+const all=await DK.listFolder(),files=all.filter(f=>f.mtime>Date.now()-150*86400000);const pick=[],dues=[];let noDue=0,bad=0;
+for(const f of files){const m=await dkMetaOf(f);if(m.bad)bad++;else if(!m.due)noDue++;else dues.push(m.due);if(m.due&&m.due>=F&&m.due<=Tt)pick.push({f,m})}
 /* pomiń zamówienia już zapisane po ostatniej zmianie pliku */
 const savedAt={};(savedDocs||[]).forEach(d=>{const x=d.data()||{};if(x.ord)savedAt[String(x.ord)]=Math.max(savedAt[String(x.ord)]||0,x.updatedAt||0)});
 const todo=pick.filter(x=>!(savedAt[x.m.ord]&&savedAt[x.m.ord]>x.f.mtime));
 const range=fmtD(F)+(F!==Tt?'–'+fmtD(Tt):'');
-if(!todo.length){msg=pick.length?`Na ${range}: ${pick.length} zam. – wszystkie były już policzone.`:`Brak zamówień z terminem na ${range} w folderze.`}
+if(!todo.length){if(pick.length)msg=`Na ${range}: ${pick.length} zam. – wszystkie były już policzone.`;else{const fut=[...new Set(dues.filter(d=>d>Tt))].sort().slice(0,4),past=[...new Set(dues.filter(d=>d<F))].sort().slice(-3);
+msg=`Brak zamówień z terminem na ${range}. W folderze: ${all.length} plików (z ostatnich 150 dni: ${files.length}) – z terminem ${dues.length}, bez terminu ${noDue}${bad?`, nierozpoznane ${bad}`:''}.${past.length?' Ostatnie terminy: '+past.map(fmtD).join(', ')+'.':''}${fut.length?' Najbliższe kolejne: '+fut.map(fmtD).join(', ')+'.':''} Termin biorę z pola „Termin” w zakładce ZAMOWIENIE.`}}
 else{batch=[];$('impMsg').innerHTML='';const fs=[];for(const x of todo){try{fs.push(await dkFile(x.f))}catch(e){}}await importMany(fs);deepCalc=true;try{await runBatch()}finally{deepCalc=false}
 const canSave=!!db&&!(multi&&!cid);if(canSave)await saveBatch();batch.forEach(b=>b.sel=true);renderBatch();
 const S2=dkSeen();todo.forEach(x=>S2[x.f.path]=Math.round(x.f.mtime));dkPut('gds-seen',S2);
