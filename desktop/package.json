@@ -1,7 +1,7 @@
 {
   "name": "cargo-planner-pro",
   "productName": "Cargo Planner Pro",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cargo Planner Pro – palety i załadunek (Grudka Studio)",
   "author": "Grudka Studio",
   "main": "main.js",

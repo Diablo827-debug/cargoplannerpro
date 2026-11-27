@@ -2,7 +2,7 @@
 // Okno ładuje cargo.grudka-studio.dev (zawsze aktualna wersja), a program dokłada to,
 // czego przeglądarka nie potrafi: obserwowanie folderu z zamówieniami, nocne liczenie,
 // zapis PDF do folderu, ikonę przy zegarku i autostart.
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, Notification, shell, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, Notification, shell, nativeImage, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -142,7 +142,10 @@ handle('cpp:printSilent', (kind) => new Promise(res => {
   // zawsze dokładnie rozmiar strony: etykieta 100×150 mm w pionie albo A4 – treść dopasowana, bez skalowania sterownika
   if (kind === 'labels') { opt.pageSize = { width: 100000, height: 150000 }; opt.landscape = false } else opt.pageSize = 'A4';
   opt.scaleFactor = 100;
-  try { win.webContents.print(opt, (ok, err) => res({ ok, err: err || '' , printer: deviceName || '(domyślna)' })) } catch (e) { res({ ok: false, err: String(e) }) }
+  // białe tło na czas druku (tło okna jest ciemne – nie może wyjść na etykiecie)
+  const bg = '#0b1220'; try { win.setBackgroundColor('#ffffff') } catch (e) { }
+  const done = (v) => { try { win.setBackgroundColor(bg) } catch (e) { } res(v) };
+  try { win.webContents.print(opt, (ok, err) => done({ ok, err: err || '', printer: deviceName || '(domyślna)' })) } catch (e) { done({ ok: false, err: String(e) }) }
 }));
 handle('cpp:openPath', (p) => { if (p && (insideFolder(p) || (S.pdfFolder && path.resolve(p).startsWith(path.resolve(S.pdfFolder))))) shell.openPath(p) });
 handle('cpp:nightlyDone', (info) => {
@@ -156,9 +159,12 @@ handle('cpp:notify', (t, b) => notify(String(t || ''), String(b || '')));
 // ---------- start ----------
 if (!app.requestSingleInstanceLock()) { app.quit() } else {
   app.on('second-instance', show);
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     app.setAppUserModelId('dev.grudka-studio.cargo');
-    loadSet(); applyAutostart(); createWindow(); createTray();
+    loadSet(); applyAutostart();
+    // zawsze najnowsza wersja strony – bez starej pamięci podręcznej (service worker / cache)
+    try { await session.defaultSession.clearStorageData({ storages: ['serviceworkers', 'cachestorage'] }); await session.defaultSession.clearCache() } catch (e) { }
+    createWindow(); createTray();
     setInterval(pollFolder, 60 * 1000);
     setInterval(checkSchedule, 30 * 1000);
     setTimeout(checkSchedule, 20 * 1000);
