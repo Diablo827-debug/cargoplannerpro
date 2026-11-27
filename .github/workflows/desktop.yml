@@ -1,0 +1,45 @@
+# Budowa programu Cargo Planner Pro na Windows (instalator .exe) i publikacja w Releases.
+# Link do pobrania zawsze ten sam:
+# https://github.com/Diablo827-debug/cargoplannerpro/releases/latest/download/CargoPlannerPro-Setup.exe
+name: Program na Windows
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - desktop/**
+      - .github/workflows/desktop.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Zależności
+        working-directory: desktop
+        run: npm ci
+      - name: Budowa instalatora
+        working-directory: desktop
+        run: npx electron-builder --win nsis --x64 --publish never
+      - name: Wersja
+        id: v
+        shell: bash
+        run: echo "v=$(node -p "require('./desktop/package.json').version")" >> $GITHUB_OUTPUT
+      - name: Publikacja w Releases
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="desktop-v${{ steps.v.outputs.v }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "desktop/dist/CargoPlannerPro-Setup.exe" --clobber
+          else
+            gh release create "$TAG" "desktop/dist/CargoPlannerPro-Setup.exe" --title "Cargo Planner Pro ${{ steps.v.outputs.v }} (Windows)" --notes "Instalator programu Cargo Planner Pro na Windows." --latest
+          fi

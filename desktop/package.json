@@ -1,0 +1,45 @@
+{
+  "name": "cargo-planner-pro",
+  "productName": "Cargo Planner Pro",
+  "version": "1.0.0",
+  "description": "Cargo Planner Pro – palety i załadunek (Grudka Studio)",
+  "author": "Grudka Studio",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "build": {
+    "appId": "dev.grudka-studio.cargo",
+    "productName": "Cargo Planner Pro",
+    "artifactName": "CargoPlannerPro-Setup.exe",
+    "files": [
+      "main.js",
+      "preload.js",
+      "build/icon.png",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Cargo Planner Pro",
+      "runAfterFinish": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "repository": "https://github.com/Diablo827-debug/cargoplannerpro"
+}
