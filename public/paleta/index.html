@@ -1338,7 +1338,7 @@ const dkSeen=()=>dkGet('gds-seen',{}),dkMeta=()=>dkGet('gds-meta',{});
 const dkKey=f=>f.path+'|'+Math.round(f.mtime);
 async function dkFile(f){const buf=await DK.readFile(f.path);return new File([buf],f.name,{lastModified:f.mtime})}
 async function dkMetaOf(f){const M=dkMeta(),k=dkKey(f);if(M[k])return M[k];let m={ord:'',due:'',dest:'',bad:1};try{const g=await parseFile(await dkFile(f));if(g)m={ord:String(g.meta.ord||''),due:g.meta.due||'',dest:g.meta.dest||''}}catch(e){}
-const M2=dkMeta();M2[k]=m;const ks=Object.keys(M2);if(ks.length>3000)ks.slice(0,ks.length-3000).forEach(x=>delete M2[x]);dkPut('gds-meta',M2);return m}
+if(m.bad)return m;/* nierozpoznanych nie zapamiętuję – spróbuję znowu (np. plik był jeszcze kopiowany) */const M2=dkMeta();M2[k]=m;const ks=Object.keys(M2);if(ks.length>3000)ks.slice(0,ks.length-3000).forEach(x=>delete M2[x]);dkPut('gds-meta',M2);return m}
 const fmtD=d=>/^\d{4}-\d\d-\d\d$/.test(d||'')?new Date(d+'T00:00').toLocaleDateString('pl-PL'):(d||'');
 const DESK_VER='1.0.1',DL_URL='https://github.com/Diablo827-debug/cargoplannerpro/releases/latest/download/CargoPlannerPro-Setup.exe';
 const verLess=(a,b)=>{a=String(a||'0').split('.').map(Number);b=String(b).split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return(a[i]||0)<(b[i]||0)}return false};
